@@ -65,7 +65,7 @@ class BigQuery implements ProviderInterface
      */
     private $exclude = [];
 
-    private $undeliveredService;
+    private $undeliveredDataModel;
 
     public function __construct(Config $config)
     {
@@ -77,7 +77,7 @@ class BigQuery implements ProviderInterface
         $this->exclude = $config['repeater']->get('exclude')->toArray();
 
         $this->dataSet = $this->client->dataset($config->get('dataset'));
-        $this->undeliveredService = new UndeliveredData($config['undeliveredDataModel']);
+        $this->undeliveredDataModel = $config['undeliveredDataModel'];
     }
 
     /**
@@ -238,12 +238,21 @@ class BigQuery implements ProviderInterface
 
     /**
      * @param array $rows
+     *
+     * @throws ValidationException
+     * @throws \Chocofamily\Analytics\Exceptions\ClassNotFound
      */
     private function createUndeliveredData(array $rows)
     {
+        if ($this->undeliveredDataModel === null) {
+            throw new ValidationException(
+                'Укажите модель для записи недоставленных данных в analytics, по ключу `undeliveredDataModel`'
+            );
+        }
+        $undeliveredService = new UndeliveredData($this->undeliveredDataModel);
         $tableName       = $this->tableName;
         $data            = json_encode($rows);
-        $this->undeliveredService->create($tableName, $data);
+        $undeliveredService->create($tableName, $data);
     }
 
     /**
