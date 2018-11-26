@@ -18,8 +18,6 @@
   ],
   "require": {
     "php": ">= 7.0.0",
-    "chocofamilyme/pathcorrelation": "0.2.*",
-    "chocofamilyme/pubsub": "^1",
     "ext-phalcon": ">= 3.0.0",
     "google/cloud-bigquery": "^1.4"
   },

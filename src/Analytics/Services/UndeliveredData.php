@@ -7,7 +7,6 @@
 namespace Chocofamily\Analytics\Services;
 
 use Chocofamily\Analytics\Exceptions\ClassNotFound;
-use Chocofamily\Analytics\Models\UndeliveredData as UndeliveredDataModel;
 use Phalcon\Mvc\Model;
 
 class UndeliveredData
