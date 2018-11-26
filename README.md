@@ -44,7 +44,7 @@ analytics со следующими полями
 
 В файле `test/bootstrap.php` есть пример добавления конфига в DI.
 
-###Пример миграции для модели UndeliveredData
+### Пример миграции для модели UndeliveredData
 ```php
 $table = $this->table('undelivered_data');
 $table->addColumn('table_name', 'string', ['null' => false]);
@@ -53,7 +53,7 @@ $table->addColumn('status', 'integer', ['default' => 0, 'limit' => 1]);
 $table->addTimestamps()->create();
 ```
 
-###Пример вставки данных в BigQuery
+### Пример вставки данных в BigQuery
 ```php
 $validator = new SenderValidator();
 $sender    = new Sender($validator)
@@ -66,7 +66,7 @@ $sender->validator->setClientData($data);
 $sender->send();
 ```
 
-###Пример переотправки и удаления недоставленных данных
+### Пример переотправки и удаления недоставленных данных
 ```php
 $limit = 100;
 
@@ -87,7 +87,7 @@ do {
 } while ($undeliveredDataSet->count() >= $limit);
 ```
 
-###Отправка запроса в BigQuery
+### Отправка запроса в BigQuery
 Если в запросе не указать LIMIT, по умолчанию подставится LIMIT 100
 ```php
 $query = "SELECT * FROM holding.chocolife_test WHERE created_at = \"2018-11-20\" LIMIT 100"
