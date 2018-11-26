@@ -1,6 +1,2 @@
-.idea/*
-
-.env
-composer.lock
-
+.idea
 vendor
