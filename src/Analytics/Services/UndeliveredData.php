@@ -17,6 +17,13 @@ class UndeliveredData
     /** @var Model */
     private $model;
 
+    /**
+     * UndeliveredData constructor.
+     *
+     * @param string $modelClass
+     *
+     * @throws ClassNotFound
+     */
     public function __construct(string $modelClass)
     {
         if (!class_exists($modelClass)) {

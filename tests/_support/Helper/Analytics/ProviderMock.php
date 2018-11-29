@@ -13,6 +13,11 @@ class ProviderMock implements \Chocofamily\Analytics\ProviderInterface
         // TODO: Implement insert() method.
     }
 
+    public function load(string $file): bool
+    {
+        // TODO: Implement load() method.
+    }
+
     public function exists(): bool
     {
         // TODO: Implement exists() method.
@@ -26,6 +31,11 @@ class ProviderMock implements \Chocofamily\Analytics\ProviderInterface
     public function getErrors(): array
     {
         // TODO: Implement getErrors() method.
+    }
+
+    public function clearErrors()
+    {
+        // TODO: Implement clearErrors() method.
     }
 
     public function setTable(string $table)

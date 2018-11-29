@@ -38,6 +38,8 @@ analytics со следующими полями
             ...
         ],
     ],
+    
+    'pathStorage' => STORAGE_PATH,
 ]
 ...
 ```
@@ -53,18 +55,33 @@ $table->addColumn('status', 'integer', ['default' => 0, 'limit' => 1]);
 $table->addTimestamps()->create();
 ```
 
-### Пример вставки данных в BigQuery
+### Пример потоковой вставки данных в BigQuery
 ```php
 $validator = new SenderValidator();
-$sender    = new Sender($validator)
+$streamer    = new Streamer($validator)
 
 $mapperClass = $this->config['mappers']->get($body['table_name'], NullMapper::class);
 $mapper = new $mapperClass;
 
-$sender->setMapper($mapper);
-$sender->validator->setClientData($data);
-$sender->send();
+$streamer->setMapper($mapper);
+$streamer->validator->setClientData($data);
+$streamer->send();
 ```
+
+### Вставка данныых с помощью задания
+Используется для загрузки большого объма данных, например отчетов.
+```php
+$validator = new SenderValidator();
+$runner    = new Runner($validator)
+
+$mapperClass = $this->config['mappers']->get($body['table_name'], NullMapper::class);
+$mapper = new $mapperClass;
+
+$runner->setMapper($mapper);
+$runner->validator->setClientData($data);
+$runner->send();
+```
+
 
 ### Пример переотправки и удаления недоставленных данных
 ```php

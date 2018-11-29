@@ -4,9 +4,12 @@
  * @author  Moldabayev Vadim <moldabayev.v@chocolife.kz>
  */
 
-namespace Chocofamily\Analytics;
+namespace Chocofamily\Analytics\DataTransfer;
 
-use Phalcon\Config;
+use Chocofamily\Analytics\MapperInterface;
+use Chocofamily\Analytics\NullMapper;
+use Chocofamily\Analytics\ProviderInterface;
+use Chocofamily\Analytics\ValidatorInterface;
 use Phalcon\Di\Injectable;
 use Phalcon\Logger\AdapterInterface;
 use Chocofamily\Analytics\Providers\BigQuery;
@@ -18,7 +21,7 @@ use Chocofamily\Analytics\Providers\BigQuery;
  *
  * @package Chocofamily\Analytics
  */
-class Sender extends Injectable
+class Streamer extends Injectable implements TransferInterface
 {
 
     /**
@@ -90,11 +93,19 @@ class Sender extends Injectable
     /**
      * Записать ошибки
      */
-    private function writeError()
+    protected function writeError()
     {
         foreach ($this->provider->getErrors() as $key => $value) {
             $this->logger->warning($key.': '.$value);
         }
+    }
+
+    /**
+     * Очищает буффер ошибок
+     */
+    public function clearErrors()
+    {
+        $this->provider->clearErrors();
     }
 
     /**
@@ -108,7 +119,7 @@ class Sender extends Injectable
     /**
      * @param array $rows
      */
-    private function dataMap(array &$rows)
+    protected function dataMap(array &$rows)
     {
         foreach ($rows as &$row) {
             $this->mapper->process($row);

@@ -12,6 +12,7 @@ use Google\Cloud\BigQuery\Table;
 use Phalcon\Config;
 use Chocofamily\Analytics\ProviderInterface;
 use Google\Cloud\BigQuery\BigQueryClient;
+use Google\Cloud\Core\ExponentialBackoff;
 
 /**
  * Class BigQuery
@@ -29,8 +30,8 @@ class BigQuery implements ProviderInterface
     ];
 
     const MAX_DELAY_MICROSECONDS = 60000000;
-    const LIMIT_NUMBER = 100;
-    const LIMIT_STRING = ' LIMIT ';
+    const LIMIT_NUMBER           = 100;
+    const LIMIT_STRING           = ' LIMIT ';
 
     /**
      * @var array
@@ -76,7 +77,7 @@ class BigQuery implements ProviderInterface
         $this->attempt = $config['repeater']->get('attempt', 5);
         $this->exclude = $config['repeater']->get('exclude')->toArray();
 
-        $this->dataSet = $this->client->dataset($config->get('dataset'));
+        $this->dataSet              = $this->client->dataset($config->get('dataset'));
         $this->undeliveredDataModel = $config['undeliveredDataModel'];
     }
 
@@ -118,11 +119,41 @@ class BigQuery implements ProviderInterface
         return $insertResponse->isSuccessful();
     }
 
+    public function load(string $file): bool
+    {
+        if (empty($this->table)) {
+            throw new ValidationException('Укажите таблицу');
+        }
+
+        $loadJobConfig = $this->table
+            ->load(fopen($file, 'r'))
+            ->ignoreUnknownValues(self::DEFAULT_OPTIONS['ignoreUnknownValues'])
+            ->sourceFormat('NEWLINE_DELIMITED_JSON');
+
+        $job = $this->table->runJob($loadJobConfig);
+
+        $backoff = new ExponentialBackoff(3);
+
+        $backoff->execute(function () use ($job) {
+            $job->reload();
+            if (!$job->isComplete()) {
+                $this->addErrors(0, 'Job has not yet completed');
+            }
+        });
+
+        if (isset($job->info()['status']['errorResult'])) {
+            $reason = $job->info()['status']['errorResult']['reason'];
+            $error  = $job->info()['status']['errorResult']['message'];
+            $this->addErrors(1, $reason.': '.$error);
+        }
+
+        return $job->isComplete();
+    }
+
     /**
      * @param $rawQuery
      *
      * @return array
-     * @throws ValidationException
      * @throws \Google\Cloud\Core\Exception\GoogleException
      */
     public function runQuery($rawQuery): array
@@ -131,7 +162,7 @@ class BigQuery implements ProviderInterface
             $rawQuery .= self::LIMIT_STRING.self::LIMIT_NUMBER;
         }
 
-        $jobConfig = $this->client->query($rawQuery);
+        $jobConfig   = $this->client->query($rawQuery);
         $queryResult = $this->client->runQuery($jobConfig);
 
         return iterator_to_array($queryResult->rows());
@@ -159,7 +190,7 @@ class BigQuery implements ProviderInterface
     /**
      * @param array $errors
      */
-    public function setErrors(array $errors): void
+    public function setErrors(array $errors)
     {
         $this->errors = $errors;
     }
@@ -203,6 +234,14 @@ class BigQuery implements ProviderInterface
             }
             $this->addErrors($row['rowData']['uuid'], $message);
         }
+    }
+
+    /**
+     * Очищает массив с ошибками
+     */
+    public function clearErrors()
+    {
+        $this->errors = [];
     }
 
     /**
@@ -250,8 +289,8 @@ class BigQuery implements ProviderInterface
             );
         }
         $undeliveredService = new UndeliveredData($this->undeliveredDataModel);
-        $tableName       = $this->tableName;
-        $data            = json_encode($rows);
+        $tableName          = $this->tableName;
+        $data               = \json_encode($rows);
         $undeliveredService->create($tableName, $data);
     }
 

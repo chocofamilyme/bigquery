@@ -6,9 +6,8 @@
 
 namespace Unit;
 
-use Helper\Analytics\ConfigMock;
+use Chocofamily\Analytics\DataTransfer\Streamer;
 use Helper\Analytics\ProviderMock;
-use Chocofamily\Analytics\Sender;
 use Chocofamily\Analytics\SenderValidator;
 
 class SenderCest
@@ -24,7 +23,7 @@ class SenderCest
         ];
 
         $validator        = new SenderValidator($data);
-        $sender           = new Sender($validator);
+        $sender           = new Streamer($validator);
         $sender->provider = new ProviderMock();
         $result           = $sender->prepare($data);
 
