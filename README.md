@@ -44,6 +44,23 @@ analytics со следующими полями
 ...
 ```
 
+Для подключения к BigQuery нужно создать **json** файл и указать к нему путь под ключем `'path'`. Пример **json** файла:
+
+```php
+{
+  "type": "service_account",
+  "project_id": "id",
+  "private_key_id": "key_id",
+  "private_key": "private_key",
+  "client_email": "client_email",
+  "client_id": "client_id",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "cert_url"
+}
+```
+
 В файле `test/bootstrap.php` есть пример добавления конфига в DI.
 
 ### Пример миграции для модели UndeliveredData
@@ -68,8 +85,8 @@ $streamer->validator->setClientData($data);
 $streamer->send();
 ```
 
-### Вставка данныых с помощью задания
-Используется для загрузки большого объма данных, например отчетов.
+### Вставка данных с помощью задания
+Используется для загрузки большого объема данных, например отчетов.
 ```php
 $validator = new SenderValidator();
 $runner    = new Runner($validator)
