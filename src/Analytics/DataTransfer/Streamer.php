@@ -9,6 +9,7 @@ namespace Chocofamily\Analytics\DataTransfer;
 use Chocofamily\Analytics\MapperInterface;
 use Chocofamily\Analytics\NullMapper;
 use Chocofamily\Analytics\ProviderInterface;
+use Chocofamily\Analytics\ProviderWrapper;
 use Chocofamily\Analytics\ValidatorInterface;
 use Phalcon\Di\Injectable;
 use Phalcon\Logger\AdapterInterface;
@@ -28,6 +29,11 @@ class Streamer extends Injectable implements TransferInterface
      * @var ProviderInterface
      */
     public $provider;
+
+    /**
+     * @var ProviderWrapper
+     */
+    public $providerWrapper;
 
     /**
      * @var AdapterInterface
@@ -51,6 +57,7 @@ class Streamer extends Injectable implements TransferInterface
     {
         $this->logger   = $this->getDI()->getShared('logger');
         $this->provider = new BigQuery($this->getDI()->getShared('config')->analytics);
+        $this->providerWrapper = new ProviderWrapper($this->provider);
 
         $this->validator = $validator;
         $this->mapper    = new NullMapper();
@@ -64,13 +71,12 @@ class Streamer extends Injectable implements TransferInterface
         $rows = $this->validator->check();
 
         $this->dataMap($rows);
-        $this->provider->insert(
+        $this->providerWrapper->insert(
             $this->prepare($rows)
         );
 
         $this->writeError();
     }
-
 
     /**
      * Подготавливает данные для провайдера

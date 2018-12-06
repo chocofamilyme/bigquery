@@ -42,4 +42,24 @@ class ProviderMock implements \Chocofamily\Analytics\ProviderInterface
     {
         // TODO: Implement setTable() method.
     }
+
+    public function addErrors(string $id, string $message)
+    {
+        // TODO: Implement addErrors() method.
+    }
+
+    public function getTableName()
+    {
+        // TODO: Implement getTableName() method.
+    }
+
+    public function getConfig()
+    {
+        // TODO: Implement getConfig() method.
+    }
+
+    public function getTable()
+    {
+        // TODO: Implement getTable() method.
+    }
 }

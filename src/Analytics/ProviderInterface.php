@@ -19,7 +19,15 @@ interface ProviderInterface
 
     public function getErrors(): array;
 
+    public function addErrors(string $id, string $message);
+
     public function clearErrors();
 
     public function setTable(string $table);
+
+    public function getTable();
+
+    public function getTableName();
+
+    public function getConfig();
 }

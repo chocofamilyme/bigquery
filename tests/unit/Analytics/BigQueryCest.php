@@ -9,31 +9,42 @@ namespace Unit;
 use Chocofamily\Analytics\ProviderInterface;
 use Chocofamily\Analytics\Providers\BigQuery;
 use Chocofamily\Analytics\Exceptions\ValidationException;
+use Chocofamily\Analytics\ProviderWrapper;
 use Helper\Analytics\Models\UndeliveredDataMock;
 
 class BigQueryCest
 {
 
-    /** @var ProviderInterface */
-    private $provider;
+    /** @var ProviderWrapper */
+    private $providerWrapper;
 
-    public function setUp()
+    private $attempt = 1;
+
+    /** @var ProviderWrapper */
+    public function setUp(\Helper\Unit $helper)
     {
+        $tableName = 'test_table';
         $analytics      = \Phalcon\Di::getDefault()->getShared('config')->analytics;
-        $this->provider = new BigQuery($analytics);
+        $provider = new BigQuery($analytics);
+        $helper->invokeProperty($provider, 'tableName', $tableName);
+
+        $this->providerWrapper = new ProviderWrapper($provider);
+        $helper->invokeProperty($this->providerWrapper, 'attempt', $this->attempt);
     }
 
     /**
      * @param \UnitTester $I
      */
-    public function tryToThrowTableIsNullException(\UnitTester $I)
+    public function tryToThrowTableIsNullException(\UnitTester $I, \Helper\Unit $helper)
     {
         $I->wantToTest('Правило на отсутсвие названия таблицы');
-        $provider = $this->provider;
+
+        $providerWrapper = $this->providerWrapper;
+
         $I->expectException(
             new ValidationException('Укажите таблицу'),
-            function () use ($provider) {
-                $provider->insert([]);
+            function () use ($providerWrapper) {
+                $providerWrapper->insert([]);
             }
         );
     }
@@ -51,7 +62,7 @@ class BigQueryCest
         $I->wantToTest('Повтор запроса');
         $exp = new ValidationException('тест');
 
-        $I->assertTrue($helper->invokeMethod($this->provider, 'checkRetry', [$exp, 1, ['test' => 'data']]));
+        $I->assertTrue($helper->invokeMethod($this->providerWrapper, 'checkRetry', [$exp, 0, ['test' => 'data']]));
     }
 
     /**
@@ -66,18 +77,14 @@ class BigQueryCest
     {
         $I->wantToTest('Выбросить исключение при привышении кол-ва попыток');
 
-        $attempt  = 1;
-        $tableName = 'test_table';
-        $provider = $this->provider;
+        $providerWrapper = $this->providerWrapper;
         $exp      = new ValidationException('тест');
 
-        $helper->invokeProperty($provider, 'attempt', $attempt);
-        $helper->invokeProperty($provider, 'tableName', $tableName);
 
         $I->expectException(
             $exp,
-            function () use ($helper, $provider, $exp, $attempt) {
-                $helper->invokeMethod($provider, 'checkRetry', [$exp, $attempt, ['test' => 'data']]);
+            function () use ($helper, $providerWrapper, $exp) {
+                $helper->invokeMethod($providerWrapper, 'checkRetry', [$exp, $this->attempt, ['test' => 'data']]);
             }
         );
     }
@@ -98,13 +105,13 @@ class BigQueryCest
 
         $exp = new ValidationException('тест');
 
-        $provider = $this->provider;
-        $helper->invokeProperty($provider, 'exclude', $exclude);
+        $providerWrapper = $this->providerWrapper;
+        $helper->invokeProperty($providerWrapper, 'exclude', $exclude);
 
         $I->expectException(
             $exp,
-            function () use ($helper, $provider, $exp) {
-                $helper->invokeMethod($provider, 'checkRetry', [$exp, 0, ['test' => 'data']]);
+            function () use ($helper, $providerWrapper, $exp) {
+                $helper->invokeMethod($providerWrapper, 'checkRetry', [$exp, 0, ['test' => 'data']]);
             }
         );
     }
@@ -121,27 +128,21 @@ class BigQueryCest
     {
         $I->wantToTest('Добавить недоставленные данные в базу');
 
-        $attempt  = 1;
-        $tableName = 'test_table';
         $data = ['test' => 'CreateUndeliveredData'];
-        $provider = $this->provider;
+        $providerWrapper = $this->providerWrapper;
         $exp      = new ValidationException('тест');
         $exclude = [];
 
-        $helper->invokeProperty($provider, 'attempt', $attempt);
-        $helper->invokeProperty($provider, 'tableName', $tableName);
-        $helper->invokeProperty($provider, 'exclude', $exclude);
+        $helper->invokeProperty($providerWrapper, 'exclude', $exclude);
 
         $I->expectException(
             $exp,
-            function () use ($helper, $provider, $exp, $data, $attempt) {
-                $helper->invokeMethod($provider, 'checkRetry', [$exp, $attempt, $data]);
+            function () use ($helper, $providerWrapper, $exp, $data) {
+                $helper->invokeMethod($providerWrapper, 'checkRetry', [$exp, $this->attempt, $data]);
             }
         );
 
         $I->assertTrue(UndeliveredDataMock::$saved);
-        //Чтобы вернуть значение $saved в false
-        UndeliveredDataMock::reload();
     }
 
     /**
@@ -155,23 +156,23 @@ class BigQueryCest
      */
     public function tryToNotCreateUndeliveredData(\UnitTester $I, \Helper\Unit $helper)
     {
+        //Чтобы вернуть значение $saved в false
+        UndeliveredDataMock::reload();
         $exclude = [
             ValidationException::class,
         ];
 
         $exp = new ValidationException('тест');
-        $tableName = 'test_table';
         $data = ['test' => 'NotCreateUndeliveredData'];
 
 
-        $provider = $this->provider;
-        $helper->invokeProperty($provider, 'exclude', $exclude);
-        $helper->invokeProperty($provider, 'tableName', $tableName);
+        $providerWrapper = $this->providerWrapper;
+        $helper->invokeProperty($providerWrapper, 'exclude', $exclude);
 
         $I->expectException(
             $exp,
-            function () use ($helper, $provider, $exp, $data) {
-                $helper->invokeMethod($provider, 'checkRetry', [$exp, 0, $data]);
+            function () use ($helper, $providerWrapper, $exp, $data) {
+                $helper->invokeMethod($providerWrapper, 'checkRetry', [$exp, 0, $data]);
             }
         );
 

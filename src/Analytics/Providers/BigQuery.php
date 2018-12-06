@@ -29,9 +29,10 @@ class BigQuery implements ProviderInterface
         'ignoreUnknownValues' => true,
     ];
 
-    const MAX_DELAY_MICROSECONDS = 60000000;
     const LIMIT_NUMBER           = 100;
     const LIMIT_STRING           = ' LIMIT ';
+
+    private $config;
 
     /**
      * @var array
@@ -56,29 +57,19 @@ class BigQuery implements ProviderInterface
      */
     private $tableName;
 
-    /**
-     * @var int
-     */
-    private $attempt = 5;
-
-    /**
-     * @var array
-     */
-    private $exclude = [];
-
-    private $undeliveredDataModel;
-
     public function __construct(Config $config)
     {
+        $this->config = $config;
         $this->client = new BigQueryClient([
             'keyFilePath' => $config->get('path'),
         ]);
 
-        $this->attempt = $config['repeater']->get('attempt', 5);
-        $this->exclude = $config['repeater']->get('exclude')->toArray();
-
         $this->dataSet              = $this->client->dataset($config->get('dataset'));
-        $this->undeliveredDataModel = $config['undeliveredDataModel'];
+    }
+
+    public function getConfig()
+    {
+        return $this->config;
     }
 
     /**
@@ -90,33 +81,7 @@ class BigQuery implements ProviderInterface
      */
     public function insert(array $rows)
     {
-        if (empty($this->table)) {
-            throw new ValidationException('Укажите таблицу');
-        }
-
-        $retryAttempt   = 0;
-        $insertResponse = null;
-        while (true) {
-            try {
-                $insertResponse = $this->table->insertRows($rows, self::DEFAULT_OPTIONS);
-                break;
-            } catch (\Exception $exception) {
-                $this->checkRetry($exception, ++$retryAttempt, $rows);
-                usleep($this->calculateDelay());
-            }
-        }
-
-        if (!$insertResponse) {
-            return false;
-        }
-
-        if (false == $insertResponse->isSuccessful()) {
-            $this->collectErrors($insertResponse->failedRows());
-
-            return false;
-        }
-
-        return $insertResponse->isSuccessful();
+        return $this->table->insertRows($rows, self::DEFAULT_OPTIONS);
     }
 
     public function load(string $file): bool
@@ -209,89 +174,9 @@ class BigQuery implements ProviderInterface
         $this->tableName = $table;
     }
 
-    /**
-     * Calculates exponential delay.
-     *
-     * @return int
-     */
-    private function calculateDelay()
+    public function getTableName()
     {
-        return min(
-            mt_rand(0, 1000000) + (pow(2, $this->attempt) * 1000000),
-            self::MAX_DELAY_MICROSECONDS
-        );
-    }
-
-    /**
-     * @param $errors
-     */
-    private function collectErrors($errors)
-    {
-        foreach ($errors as $row) {
-            $message = '';
-            foreach ($row['errors'] as $error) {
-                $message .= $error['reason'].': '.$error['message'].PHP_EOL;
-            }
-            $this->addErrors($row['rowData']['uuid'], $message);
-        }
-    }
-
-    /**
-     * Очищает массив с ошибками
-     */
-    public function clearErrors()
-    {
-        $this->errors = [];
-    }
-
-    /**
-     * @param \Exception $exception
-     * @param int        $attempt
-     * @param array      $rows
-     *
-     * @return bool
-     * @throws \Exception
-     */
-    private function checkRetry(\Exception $exception, int $attempt, array $rows)
-    {
-        $attemptsExceeded = $this->attemptsExceeded($attempt);
-        if (in_array(get_class($exception), $this->exclude) or $attemptsExceeded) {
-            if ($attemptsExceeded) {
-                $this->createUndeliveredData($rows);
-            }
-            throw $exception;
-        }
-
-        return true;
-    }
-
-    /**
-     * @param $attempt
-     *
-     * @return bool
-     */
-    private function attemptsExceeded($attempt)
-    {
-        return $attempt >= $this->attempt;
-    }
-
-    /**
-     * @param array $rows
-     *
-     * @throws ValidationException
-     * @throws \Chocofamily\Analytics\Exceptions\ClassNotFound
-     */
-    private function createUndeliveredData(array $rows)
-    {
-        if ($this->undeliveredDataModel === null) {
-            throw new ValidationException(
-                'Укажите модель для записи недоставленных данных в analytics, по ключу `undeliveredDataModel`'
-            );
-        }
-        $undeliveredService = new UndeliveredData($this->undeliveredDataModel);
-        $tableName          = $this->tableName;
-        $data               = \json_encode($rows);
-        $undeliveredService->create($tableName, $data);
+        return $this->tableName;
     }
 
     /**
@@ -302,5 +187,18 @@ class BigQuery implements ProviderInterface
     private function queryContainsLimit($rawQuery)
     {
         return strpos(mb_strtolower($rawQuery), strtolower(self::LIMIT_STRING)) !== false;
+    }
+
+    /**
+     * Очищает массив с ошибками
+     */
+    public function clearErrors()
+    {
+        $this->errors = [];
+    }
+
+    public function getTable()
+    {
+        return $this->table;
     }
 }
