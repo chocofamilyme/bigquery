@@ -56,8 +56,8 @@ class Repeater implements RepeaterInterface
                     break;
                 }
 
-                $this->calculateDelay($retryAttempt);
                 $retryAttempt++;
+                $this->calculateDelay($retryAttempt);
             }
         }
 
@@ -66,6 +66,6 @@ class Repeater implements RepeaterInterface
 
     public function calculateDelay(int $retryAttempt)
     {
-        usleep($this->attempt * $retryAttempt);
+        usleep($this->delay * $retryAttempt);
     }
 }
