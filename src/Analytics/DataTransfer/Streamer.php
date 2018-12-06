@@ -6,6 +6,7 @@
 
 namespace Chocofamily\Analytics\DataTransfer;
 
+use Chocofamily\Analytics\Repeater;
 use Chocofamily\Analytics\ValidatorInterface;
 
 use Chocofamily\Analytics\Providers\BigQuery\Streamer as ProviderStreamer;
@@ -19,6 +20,19 @@ use Chocofamily\Analytics\Providers\BigQuery\Streamer as ProviderStreamer;
  */
 class Streamer extends Transfer
 {
+
+    const REPEAT_DELAY = 1;
+
+    /**
+     * @var Repeater
+     */
+    private $repeater;
+
+    /**
+     * @var array
+     */
+    private $excludeExceptions = [];
+
     /**
      * Streamer constructor.
      *
@@ -28,11 +42,24 @@ class Streamer extends Transfer
     {
         parent::__construct($validator);
 
-        $this->transfer = new ProviderStreamer($this->getDI()->getShared('config')->analytics);
+        /** @var \Phalcon\Config $config */
+        $config                  = $this->getDI()->getShared('config')->analytics;
+        $attempt                 = $config->get('repeater')->get('attempt', 5);
+        $this->excludeExceptions = $config->get('repeater')->get('exclude', []);
+        $excludeExceptions       = $this->excludeExceptions;
+
+        $this->transfer = new ProviderStreamer($config);
+
+        $this->repeater = new Repeater(
+            self::REPEAT_DELAY,
+            $attempt,
+            function ($exception) use ($excludeExceptions) {
+                return in_array(get_class($exception), $excludeExceptions);
+            }
+        );
     }
 
     /**
-     * @throws \Chocofamily\Analytics\Exceptions\ValidationException
      */
     public function send()
     {
@@ -40,7 +67,17 @@ class Streamer extends Transfer
 
         $this->dataMap($rows);
         $this->transfer->setRows($this->prepare($rows));
-        $this->transfer->execute();
+
+        try {
+            $this->repeater->run(function (ProviderStreamer $transfer) {
+                $transfer->execute();
+            }, $this->transfer);
+        } catch (\Exception $e) {
+            if (false == in_array(get_class($e), $this->excludeExceptions)) {
+                //TODO SAVE
+            }
+        }
+
 
         $this->writeError();
     }

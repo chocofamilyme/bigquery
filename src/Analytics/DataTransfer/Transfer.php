@@ -9,6 +9,7 @@ namespace Chocofamily\Analytics\DataTransfer;
 use Chocofamily\Analytics\MapperInterface;
 use Chocofamily\Analytics\NullMapper;
 use Chocofamily\Analytics\Providers\ProviderInterface;
+use Chocofamily\Analytics\Repeater;
 use Chocofamily\Analytics\ValidatorInterface;
 use Phalcon\Di\Injectable;
 use Phalcon\Logger\AdapterInterface;

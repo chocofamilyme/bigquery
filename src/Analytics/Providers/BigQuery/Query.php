@@ -6,7 +6,11 @@
 
 namespace Chocofamily\Analytics\Providers\BigQuery;
 
-
+/**
+ * Class Query
+ *
+ * @package Chocofamily\Analytics\Providers\BigQuery
+ */
 class Query extends Transfer
 {
     /**

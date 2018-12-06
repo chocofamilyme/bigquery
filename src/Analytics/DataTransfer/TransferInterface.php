@@ -6,7 +6,11 @@
 
 namespace Chocofamily\Analytics\DataTransfer;
 
-
+/**
+ * Interface TransferInterface
+ *
+ * @package Chocofamily\Analytics\DataTransfer
+ */
 interface TransferInterface
 {
     public function send();

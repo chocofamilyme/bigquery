@@ -15,7 +15,7 @@ class RepeaterCest
     {
         $I->wantToTest('Правильная передача аргументов');
 
-        $repeater = new Repeater(1, 1);
+        $repeater = new Repeater(0, 0);
         $argument = 'response';
 
         $result = $repeater->run(function ($argument) {
@@ -33,8 +33,8 @@ class RepeaterCest
             ValidationException::class
         ];
         $message = 'error msg';
-        $repeater = new Repeater(1, 1, function ($exception) use ($excludeExceptions) {
-            return in_array($exception, $excludeExceptions);
+        $repeater = new Repeater(0, 0, function ($exception) use ($excludeExceptions) {
+            return in_array(get_class($exception), $excludeExceptions);
         });
 
         $I->expectException(
@@ -53,7 +53,7 @@ class RepeaterCest
         $I->wantToTest('Выбросить исключение после повторов');
 
         $message = 'error msg';
-        $repeater = new Repeater(1, 1);
+        $repeater = new Repeater(0, 0);
 
         $I->expectException(
             new ValidationException($message),

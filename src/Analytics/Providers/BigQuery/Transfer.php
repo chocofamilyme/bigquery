@@ -85,6 +85,20 @@ abstract class Transfer implements ProviderInterface
     }
 
     /**
+     * @param $errors
+     */
+    protected function collectErrors($errors)
+    {
+        foreach ($errors as $row) {
+            $message = '';
+            foreach ($row['errors'] as $error) {
+                $message .= $error['reason'].': '.$error['message'].PHP_EOL;
+            }
+            $this->addErrors($row['rowData']['uuid'], $message);
+        }
+    }
+
+    /**
      * @return array
      */
     public function getErrors(): array
