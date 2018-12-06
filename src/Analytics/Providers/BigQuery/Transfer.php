@@ -41,7 +41,7 @@ abstract class Transfer implements ProviderInterface
     /**
      * @var BigQueryClient
      */
-    private $client;
+    protected $client;
 
     /**
      * @var \Google\Cloud\BigQuery\Dataset
@@ -72,62 +72,7 @@ abstract class Transfer implements ProviderInterface
         $this->dataSet = $this->client->dataset($config->get('dataset'));
     }
 
-    public function getConfig()
-    {
-        return $this->config;
-    }
-
     abstract public function execute(): bool;
-
-    public function load(string $file): bool
-    {
-        if (empty($this->table)) {
-            throw new ValidationException('Укажите таблицу');
-        }
-
-        $loadJobConfig = $this->table
-            ->load(fopen($file, 'r'))
-            ->ignoreUnknownValues(self::DEFAULT_OPTIONS['ignoreUnknownValues'])
-            ->sourceFormat('NEWLINE_DELIMITED_JSON');
-
-        $job = $this->table->runJob($loadJobConfig);
-
-        $backoff = new ExponentialBackoff(3);
-
-        $backoff->execute(function () use ($job) {
-            $job->reload();
-            if (!$job->isComplete()) {
-                $this->addErrors(0, 'Job has not yet completed');
-            }
-        });
-
-        if (isset($job->info()['status']['errorResult'])) {
-            $reason = $job->info()['status']['errorResult']['reason'];
-            $error  = $job->info()['status']['errorResult']['message'];
-            $this->addErrors(1, $reason.': '.$error);
-        }
-
-        return $job->isComplete();
-    }
-
-    /**
-     * @param $rawQuery
-     *
-     * @return array
-     * @throws \Google\Cloud\Core\Exception\GoogleException
-     */
-    public function runQuery($rawQuery): array
-    {
-        if (!$this->queryContainsLimit($rawQuery)) {
-            $rawQuery .= self::LIMIT_STRING.self::LIMIT_NUMBER;
-        }
-
-        $jobConfig   = $this->client->query($rawQuery);
-        $queryResult = $this->client->runQuery($jobConfig);
-
-        return iterator_to_array($queryResult->rows());
-    }
-
 
     public function exists(): bool
     {
@@ -172,16 +117,6 @@ abstract class Transfer implements ProviderInterface
     public function getTableName()
     {
         return $this->tableName;
-    }
-
-    /**
-     * @param $rawQuery
-     *
-     * @return bool
-     */
-    private function queryContainsLimit($rawQuery)
-    {
-        return strpos(mb_strtolower($rawQuery), strtolower(self::LIMIT_STRING)) !== false;
     }
 
     /**

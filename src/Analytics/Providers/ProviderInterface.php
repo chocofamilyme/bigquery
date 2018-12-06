@@ -26,6 +26,4 @@ interface ProviderInterface
     public function getTable();
 
     public function getTableName();
-
-    public function getConfig();
 }
