@@ -4,21 +4,15 @@
  * @author  Kamet Aziza <kamet.a@chocolife.kz>
  */
 
-namespace Chocofamily\Analytics;
+namespace Chocofamily\Analytics\Providers\BigQuery;
 
 use Chocofamily\Analytics\Exceptions\ValidationException;
 use Chocofamily\Analytics\Services\UndeliveredData;
+use Phalcon\Config;
 
-class ProviderWrapper
+class Streamer extends Transfer
 {
     const MAX_DELAY_MICROSECONDS = 60000000;
-
-    private $provider;
-
-    /**
-     * @var int
-     */
-    private $attempt = 5;
 
     /**
      * @var array
@@ -27,19 +21,27 @@ class ProviderWrapper
 
     private $undeliveredDataModel;
 
-    public function __construct(ProviderInterface $provider)
-    {
-        $this->provider = $provider;
-        $config = $provider->getConfig();
+    /**
+     * @var array
+     */
+    private $rows = [];
 
-        $this->attempt = $config['repeater']->get('attempt', 5);
+    public function __construct(Config $config)
+    {
+        parent::__construct($config);
+
         $this->undeliveredDataModel = $config['undeliveredDataModel'];
-        $this->exclude = $config['repeater']->get('exclude')->toArray();
+        $this->exclude              = $config['repeater']->get('exclude')->toArray();
     }
 
-    public function insert(array $rows)
+    public function setRows(array $rows)
     {
-        if (empty($this->provider->getTable())) {
+        $this->rows = $rows;
+    }
+
+    public function execute(): bool
+    {
+        if (empty($this->getTable())) {
             throw new ValidationException('Укажите таблицу');
         }
 
@@ -47,10 +49,10 @@ class ProviderWrapper
         $insertResponse = null;
         while (true) {
             try {
-                $insertResponse = $this->provider->insert($rows);
+                $insertResponse = $this->getTable()->insertRows($this->rows, self::DEFAULT_OPTIONS);
                 break;
             } catch (\Exception $exception) {
-                $this->checkRetry($exception, ++$retryAttempt, $rows);
+                $this->checkRetry($exception, ++$retryAttempt, $this->rows);
                 usleep($this->calculateDelay());
             }
         }
@@ -66,11 +68,6 @@ class ProviderWrapper
         }
 
         return $insertResponse->isSuccessful();
-    }
-
-    public function getProvider()
-    {
-        return $this->provider;
     }
 
     /**
@@ -96,7 +93,7 @@ class ProviderWrapper
             foreach ($row['errors'] as $error) {
                 $message .= $error['reason'].': '.$error['message'].PHP_EOL;
             }
-            $this->provider->addErrors($row['rowData']['uuid'], $message);
+            $this->addErrors($row['rowData']['uuid'], $message);
         }
     }
 
@@ -145,7 +142,7 @@ class ProviderWrapper
             );
         }
         $undeliveredService = new UndeliveredData($this->undeliveredDataModel);
-        $tableName          = $this->provider->getTableName();
+        $tableName          = $this->getTableName();
         $data               = \json_encode($rows);
         $undeliveredService->create($tableName, $data);
     }

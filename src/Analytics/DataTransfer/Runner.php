@@ -7,12 +7,13 @@
 namespace Chocofamily\Analytics\DataTransfer;
 
 use Chocofamily\Analytics\Exceptions\ValidationException;
+use Chocofamily\Analytics\Providers\BigQuery\Job;
 use Chocofamily\Analytics\ValidatorInterface;
 
 /**
  * Для запуска задач
  */
-class Runner extends Streamer implements TransferInterface
+class Runner extends Transfer
 {
 
     const FOLDER        = 'analytics';
@@ -37,8 +38,11 @@ class Runner extends Streamer implements TransferInterface
     {
         parent::__construct($validator);
 
+        $this->transfer = new Job($this->getDI()->getShared('config')->analytics);
+
         $this->pathStorage = $this->getDI()->getShared('config')->analytics->get('pathStorage');
     }
+
 
     /**
      * @throws ValidationException
@@ -51,7 +55,8 @@ class Runner extends Streamer implements TransferInterface
         $this->writeTempFile($rows);
 
         try {
-            $this->provider->load($this->getFilePath());
+            $this->transfer->setFile($this->getFilePath());
+            $this->transfer->execute();
         } catch (\Exception $e) {
             throw $e;
         } finally {

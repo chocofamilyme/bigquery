@@ -4,13 +4,12 @@
  * @author  Moldabayev Vadim <moldabayev.v@chocolife.kz>
  */
 
-namespace Chocofamily\Analytics\Providers;
+namespace Chocofamily\Analytics\Providers\BigQuery;
 
 use Chocofamily\Analytics\Exceptions\ValidationException;
-use Chocofamily\Analytics\Services\UndeliveredData;
+use Chocofamily\Analytics\Providers\ProviderInterface;
 use Google\Cloud\BigQuery\Table;
 use Phalcon\Config;
-use Chocofamily\Analytics\ProviderInterface;
 use Google\Cloud\BigQuery\BigQueryClient;
 use Google\Cloud\Core\ExponentialBackoff;
 
@@ -21,7 +20,7 @@ use Google\Cloud\Core\ExponentialBackoff;
  *
  * @package Chocofamily\Analytics\Providers
  */
-class BigQuery implements ProviderInterface
+abstract class Transfer implements ProviderInterface
 {
 
     const DEFAULT_OPTIONS = [
@@ -29,8 +28,8 @@ class BigQuery implements ProviderInterface
         'ignoreUnknownValues' => true,
     ];
 
-    const LIMIT_NUMBER           = 100;
-    const LIMIT_STRING           = ' LIMIT ';
+    const LIMIT_NUMBER = 100;
+    const LIMIT_STRING = ' LIMIT ';
 
     private $config;
 
@@ -53,6 +52,11 @@ class BigQuery implements ProviderInterface
     private $table;
 
     /**
+     * @var int
+     */
+    protected $attempt = 5;
+
+    /**
      * @var string
      */
     private $tableName;
@@ -64,7 +68,8 @@ class BigQuery implements ProviderInterface
             'keyFilePath' => $config->get('path'),
         ]);
 
-        $this->dataSet              = $this->client->dataset($config->get('dataset'));
+        $this->attempt = $config['repeater']->get('attempt', 5);
+        $this->dataSet = $this->client->dataset($config->get('dataset'));
     }
 
     public function getConfig()
@@ -72,17 +77,7 @@ class BigQuery implements ProviderInterface
         return $this->config;
     }
 
-    /**
-     * @param array $rows
-     *
-     * @return bool
-     * @throws ValidationException
-     * @throws \Exception
-     */
-    public function insert(array $rows)
-    {
-        return $this->table->insertRows($rows, self::DEFAULT_OPTIONS);
-    }
+    abstract public function execute(): bool;
 
     public function load(string $file): bool
     {

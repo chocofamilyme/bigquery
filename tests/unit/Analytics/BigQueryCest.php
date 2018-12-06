@@ -6,45 +6,45 @@
 
 namespace Unit;
 
-use Chocofamily\Analytics\ProviderInterface;
-use Chocofamily\Analytics\Providers\BigQuery;
 use Chocofamily\Analytics\Exceptions\ValidationException;
-use Chocofamily\Analytics\ProviderWrapper;
+use Chocofamily\Analytics\Providers\BigQuery\Streamer;
 use Helper\Analytics\Models\UndeliveredDataMock;
 
 class BigQueryCest
 {
 
-    /** @var ProviderWrapper */
-    private $providerWrapper;
+    /** @var Streamer */
+    private $streamer;
 
     private $attempt = 1;
 
-    /** @var ProviderWrapper */
+    /**
+     * @param \Helper\Unit $helper
+     *
+     * @throws \ReflectionException
+     */
     public function setUp(\Helper\Unit $helper)
     {
-        $tableName = 'test_table';
         $analytics      = \Phalcon\Di::getDefault()->getShared('config')->analytics;
-        $provider = new BigQuery($analytics);
-        $helper->invokeProperty($provider, 'tableName', $tableName);
+        $this->streamer = new Streamer($analytics);
 
-        $this->providerWrapper = new ProviderWrapper($provider);
-        $helper->invokeProperty($this->providerWrapper, 'attempt', $this->attempt);
+        $helper->invokeProperty($this->streamer, 'attempt', $this->attempt);
     }
 
     /**
      * @param \UnitTester $I
      */
-    public function tryToThrowTableIsNullException(\UnitTester $I, \Helper\Unit $helper)
+    public function tryToThrowTableIsNullException(\UnitTester $I)
     {
         $I->wantToTest('Правило на отсутсвие названия таблицы');
 
-        $providerWrapper = $this->providerWrapper;
+        $providerWrapper = $this->streamer;
+        $providerWrapper->setRows([]);
 
         $I->expectException(
             new ValidationException('Укажите таблицу'),
             function () use ($providerWrapper) {
-                $providerWrapper->insert([]);
+                $providerWrapper->execute();
             }
         );
     }
@@ -60,9 +60,10 @@ class BigQueryCest
     public function tryToCheckRetryAttempt(\UnitTester $I, \Helper\Unit $helper)
     {
         $I->wantToTest('Повтор запроса');
+
         $exp = new ValidationException('тест');
 
-        $I->assertTrue($helper->invokeMethod($this->providerWrapper, 'checkRetry', [$exp, 0, ['test' => 'data']]));
+        $I->assertTrue($helper->invokeMethod($this->streamer, 'checkRetry', [$exp, 0, ['test' => 'data']]));
     }
 
     /**
@@ -71,14 +72,16 @@ class BigQueryCest
      * @param \UnitTester  $I
      * @param \Helper\Unit $helper
      *
-     * @throws \ReflectionException
      */
     public function tryToCheckRetryExceptionAttempt(\UnitTester $I, \Helper\Unit $helper)
     {
         $I->wantToTest('Выбросить исключение при привышении кол-ва попыток');
 
-        $providerWrapper = $this->providerWrapper;
-        $exp      = new ValidationException('тест');
+        $providerWrapper = $this->streamer;
+        $tableName       = 'test_table';
+        $providerWrapper->setTable($tableName);
+
+        $exp = new ValidationException('тест');
 
 
         $I->expectException(
@@ -105,7 +108,7 @@ class BigQueryCest
 
         $exp = new ValidationException('тест');
 
-        $providerWrapper = $this->providerWrapper;
+        $providerWrapper = $this->streamer;
         $helper->invokeProperty($providerWrapper, 'exclude', $exclude);
 
         $I->expectException(
@@ -129,8 +132,12 @@ class BigQueryCest
         $I->wantToTest('Добавить недоставленные данные в базу');
 
         $data = ['test' => 'CreateUndeliveredData'];
-        $providerWrapper = $this->providerWrapper;
-        $exp      = new ValidationException('тест');
+
+        $providerWrapper = $this->streamer;
+        $tableName       = 'test_table';
+        $providerWrapper->setTable($tableName);
+
+        $exp     = new ValidationException('тест');
         $exclude = [];
 
         $helper->invokeProperty($providerWrapper, 'exclude', $exclude);
@@ -162,11 +169,11 @@ class BigQueryCest
             ValidationException::class,
         ];
 
-        $exp = new ValidationException('тест');
+        $exp  = new ValidationException('тест');
         $data = ['test' => 'NotCreateUndeliveredData'];
 
 
-        $providerWrapper = $this->providerWrapper;
+        $providerWrapper = $this->streamer;
         $helper->invokeProperty($providerWrapper, 'exclude', $exclude);
 
         $I->expectException(

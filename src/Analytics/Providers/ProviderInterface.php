@@ -4,14 +4,12 @@
  * @author  Moldabayev Vadim <moldabayev.v@chocolife.kz>
  */
 
-namespace Chocofamily\Analytics;
+namespace Chocofamily\Analytics\Providers;
 
 interface ProviderInterface
 {
 
-    public function insert(array $rows);
-
-    public function load(string $file);
+    public function execute(): bool;
 
     public function exists(): bool;
 

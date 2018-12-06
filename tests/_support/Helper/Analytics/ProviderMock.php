@@ -5,17 +5,11 @@
  */
 namespace Helper\Analytics;
 
-class ProviderMock implements \Chocofamily\Analytics\ProviderInterface
+class ProviderMock implements \Chocofamily\Analytics\Providers\ProviderInterface
 {
-
-    public function insert(array $rows)
+    public function execute(): bool
     {
-        // TODO: Implement insert() method.
-    }
-
-    public function load(string $file): bool
-    {
-        // TODO: Implement load() method.
+        // TODO: Implement execute() method.
     }
 
     public function exists(): bool
