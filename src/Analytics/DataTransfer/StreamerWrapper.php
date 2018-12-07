@@ -50,7 +50,6 @@ class StreamerWrapper extends Delivery
         $this->buffer->addBuffer($this->transfer->getTableName(), $rows);
 
         if ($this->buffer->run($this->transfer)) {
-            $this->buffer->force($this->transfer);
             $this->writeError();
         }
     }

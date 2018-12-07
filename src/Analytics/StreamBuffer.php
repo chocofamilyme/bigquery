@@ -70,7 +70,7 @@ class StreamBuffer
             $this->buffer[$tableName]['sizeLimit'] = $sizeLimit;
         }
 
-        $this->buffer[$tableName]['data'] = array_merge($this->buffer[$tableName]['data'], $row) ;
+        $this->buffer[$tableName]['data'] = array_merge($this->buffer[$tableName]['data'], $row);
     }
 
     /**
@@ -112,6 +112,7 @@ class StreamBuffer
             ]);
 
             $this->flush($tableName);
+            $this->force($provider);
 
             return $result;
         }
@@ -134,7 +135,10 @@ class StreamBuffer
             time() - self::TIME_LIMIT > $this->buffer[$tableName]['timestamp'];
     }
 
-    public function force(ProviderInterface $provider)
+    /**
+     * @param ProviderInterface $provider
+     */
+    private function force(ProviderInterface $provider)
     {
         if (rand(1, 100) < self::FORCE_PERCENT) {
             foreach ($this->buffer as $tableName => $buffer) {
