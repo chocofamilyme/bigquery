@@ -6,14 +6,14 @@
 
 namespace Chocofamily\Analytics\DataTransfer;
 
-use Chocofamily\Analytics\Exceptions\ValidationException;
+use Chocofamily\Analytics\Exceptions\NotFoundFileException;
 use Chocofamily\Analytics\Providers\BigQuery\Job;
 use Chocofamily\Analytics\ValidatorInterface;
 
 /**
- * Для запуска задач
+ * Для запуска задач через выбранного провайдера
  */
-class Runner extends Transfer
+class RunnerWrapper extends Delivery
 {
 
     const FOLDER        = 'analytics';
@@ -45,7 +45,8 @@ class Runner extends Transfer
 
 
     /**
-     * @throws ValidationException
+     * @throws NotFoundFileException
+     * @throws \Exception
      */
     public function send()
     {
@@ -68,7 +69,7 @@ class Runner extends Transfer
 
     /**
      * @return string
-     * @throws ValidationException
+     * @throws NotFoundFileException
      */
     private function getFilePath(): string
     {
@@ -82,12 +83,12 @@ class Runner extends Transfer
     }
 
     /**
-     * @throws ValidationException
+     * @throws NotFoundFileException
      */
     private function createTempFile()
     {
         if (empty($this->pathStorage) and false == is_dir($this->pathStorage)) {
-            throw new ValidationException(
+            throw new NotFoundFileException(
                 sprintf('Папка для хранения временных файлов не существует, проверти настройки параметра pathStorage: %s',
                     $this->pathStorage));
         }
@@ -107,7 +108,7 @@ class Runner extends Transfer
      *
      * @param array $rows
      *
-     * @throws ValidationException
+     * @throws NotFoundFileException
      */
     private function writeTempFile(array $rows)
     {
@@ -120,7 +121,7 @@ class Runner extends Transfer
     }
 
     /**
-     * @throws ValidationException
+     * @throws NotFoundFileException
      */
     private function deleteTempFile()
     {

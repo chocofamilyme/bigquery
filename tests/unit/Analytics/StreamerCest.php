@@ -6,16 +6,16 @@
 
 namespace Unit;
 
-use Chocofamily\Analytics\DataTransfer\Streamer;
+use Chocofamily\Analytics\DataTransfer\StreamerWrapper;
 use Chocofamily\Analytics\Exceptions\ValidationException;
-use Chocofamily\Analytics\SenderValidator;
+use Chocofamily\Analytics\DataValidator;
 use Helper\Analytics\Models\UndeliveredDataMock;
 use Helper\Analytics\StreamerMock;
 
 class StreamerCest
 {
     /**
-     * @var Streamer
+     * @var StreamerWrapper
      */
     private $streamer;
 
@@ -30,8 +30,8 @@ class StreamerCest
         ];
         $mapperClass = \Phalcon\Di::getDefault()->getShared('config')->analytics->mappers->tableName;
 
-        $validator      = new SenderValidator($data);
-        $this->streamer = new Streamer($validator);
+        $validator      = new DataValidator($data);
+        $this->streamer = new StreamerWrapper($validator);
 
         $this->streamer->transfer = new StreamerMock();
         $this->streamer->setMapper(new $mapperClass);

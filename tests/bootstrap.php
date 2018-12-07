@@ -34,7 +34,7 @@ $di->set(
                     'tableName' => \Chocofamily\Analytics\NullMapper::class,
                 ],
 
-                'repeater' => [
+                'repeater'    => [
                     'attempt' => 5,
                     'exclude' => [
                         \InvalidArgumentException::class,
@@ -42,7 +42,7 @@ $di->set(
                     ],
                 ],
                 'pathStorage' => __DIR__,
-            ]
+            ],
         ]);
     }
 );

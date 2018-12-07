@@ -9,12 +9,15 @@ namespace Chocofamily\Analytics\DataTransfer;
 use Chocofamily\Analytics\MapperInterface;
 use Chocofamily\Analytics\NullMapper;
 use Chocofamily\Analytics\Providers\ProviderInterface;
+use Chocofamily\Analytics\Repeater;
 use Chocofamily\Analytics\ValidatorInterface;
 use Phalcon\Di\Injectable;
 use Phalcon\Logger\AdapterInterface;
 
-abstract class Transfer extends Injectable implements TransferInterface
+abstract class Delivery extends Injectable implements DeliveryInterface
 {
+    const REPEAT_DELAY = 1;
+
     /**
      * @var ProviderInterface
      */
@@ -34,6 +37,22 @@ abstract class Transfer extends Injectable implements TransferInterface
     private $mapper;
 
     /**
+     * @var \Phalcon\Config
+     */
+    protected $config;
+
+    /**
+     * @var Repeater
+     */
+    private $repeater;
+
+    /**
+     * @var array
+     */
+    private $excludeExceptions = [];
+
+
+    /**
      * Sender constructor.
      *
      * @param ValidatorInterface $validator
@@ -41,9 +60,21 @@ abstract class Transfer extends Injectable implements TransferInterface
     public function __construct(ValidatorInterface $validator)
     {
         $this->logger = $this->getDI()->getShared('logger');
+        $this->config = $this->getDI()->getShared('config')->analytics;
 
         $this->validator = $validator;
         $this->mapper    = new NullMapper();
+
+        $attempt                 = $this->config->get('repeater')->get('attempt', 5);
+        $this->excludeExceptions = $this->config->get('repeater')->get('exclude', []);
+
+        $this->repeater = new Repeater(
+            self::REPEAT_DELAY,
+            $attempt,
+            function ($exception) {
+                return $this->isExclude($exception);
+            }
+        );
     }
 
     public function setTable(string $tableName): void
@@ -52,6 +83,17 @@ abstract class Transfer extends Injectable implements TransferInterface
     }
 
     abstract public function send();
+
+
+    /**
+     * @throws \Exception
+     */
+    protected function execute()
+    {
+        $this->repeater->run(function () {
+            $this->transfer->execute();
+        });
+    }
 
     /**
      * Подготавливает данные для провайдера
@@ -110,5 +152,15 @@ abstract class Transfer extends Injectable implements TransferInterface
         foreach ($rows as &$row) {
             $this->mapper->process($row);
         }
+    }
+
+    /**
+     * @param \Exception $exception
+     *
+     * @return bool
+     */
+    protected function isExclude(\Exception $exception): bool
+    {
+        return in_array(get_class($exception), $this->excludeExceptions);
     }
 }

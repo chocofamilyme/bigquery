@@ -7,16 +7,23 @@
 namespace Chocofamily\Analytics\Providers\BigQuery;
 
 use Chocofamily\Analytics\Exceptions\ValidationException;
+use Chocofamily\Analytics\Providers\JobInterface;
 use Google\Cloud\Core\ExponentialBackoff;
 
-class Job extends Transfer
+/**
+ * Class Job выполняет загрузку данных через задачу
+ * Рекомендации https://cloud.google.com/bigquery/quotas#load_jobs
+ *
+ * @package Chocofamily\Analytics\Providers\BigQuery
+ */
+class Job extends Transfer implements JobInterface
 {
     /**
      * @var string
      */
     private $file = '';
 
-    public function setFile(string $fileName)
+    public function setFile(string $fileName): void
     {
         $this->file = $fileName;
     }

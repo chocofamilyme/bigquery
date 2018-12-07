@@ -6,9 +6,9 @@
 
 namespace Helper\Analytics\Models;
 
-use Chocofamily\Analytics\DataTransfer\Transfer;
+use Chocofamily\Analytics\DataTransfer\Delivery;
 
-class TransferMock extends Transfer
+class DeliveryMock extends Delivery
 {
 
     public function send()

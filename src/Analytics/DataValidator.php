@@ -17,7 +17,7 @@ use Phalcon\Validation\Validator\PresenceOf;
  *
  * @package Chocofamily\Analytics
  */
-class SenderValidator implements ValidatorInterface
+class DataValidator implements ValidatorInterface
 {
 
     private $clientData;

@@ -9,6 +9,11 @@ namespace Chocofamily\Analytics;
 use Phalcon\Events\EventsAwareInterface;
 use Phalcon\Events\ManagerInterface;
 
+/**
+ * Class BigQueryProfiler
+ *
+ * @package Chocofamily\Analytics
+ */
 class BigQueryProfiler implements EventsAwareInterface
 {
     /**

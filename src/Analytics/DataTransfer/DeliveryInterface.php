@@ -13,7 +13,7 @@ use Chocofamily\Analytics\MapperInterface;
  *
  * @package Chocofamily\Analytics\DataTransfer
  */
-interface TransferInterface
+interface DeliveryInterface
 {
     public function send();
 

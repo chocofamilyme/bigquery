@@ -6,8 +6,8 @@
 
 namespace Unit;
 
-use Chocofamily\Analytics\SenderValidator;
-use Helper\Analytics\Models\TransferMock;
+use Chocofamily\Analytics\DataValidator;
+use Helper\Analytics\Models\DeliveryMock;
 
 class TransferCest
 {
@@ -27,8 +27,8 @@ class TransferCest
             ],
         ];
 
-        $validator = new SenderValidator($data);
-        $streamer  = new TransferMock($validator);
+        $validator = new DataValidator($data);
+        $streamer  = new DeliveryMock($validator);
         $result = $helper->invokeMethod($streamer, 'prepare', [$data]);
 
         $I->assertEquals([

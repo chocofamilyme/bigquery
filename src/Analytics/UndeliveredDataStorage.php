@@ -9,6 +9,11 @@ namespace Chocofamily\Analytics;
 use Chocofamily\Analytics\Exceptions\ValidationException;
 use Chocofamily\Analytics\Services\UndeliveredData;
 
+/**
+ * Class UndeliveredDataStorage сохраняет storage не отправленные данные
+ *
+ * @package Chocofamily\Analytics
+ */
 class UndeliveredDataStorage
 {
     private $undeliveredDataModel;

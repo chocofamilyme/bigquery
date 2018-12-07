@@ -6,12 +6,15 @@
 
 namespace Chocofamily\Analytics\Providers\BigQuery;
 
+use Chocofamily\Analytics\Providers\QueryInterface;
+
 /**
- * Class Query
+ * Class Query выполняет sql запрос в BigQuery
+ * Рекомендации https://cloud.google.com/bigquery/quotas#data_manipulation_language_statements
  *
  * @package Chocofamily\Analytics\Providers\BigQuery
  */
-class Query extends Transfer
+class Query extends Transfer implements QueryInterface
 {
     /**
      * @var string

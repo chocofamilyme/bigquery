@@ -6,7 +6,11 @@
 
 namespace Chocofamily\Analytics;
 
-
+/**
+ * Class Repeater повторяет переданную функцию, если происходит не придвиденной исключение
+ *
+ * @package Chocofamily\Analytics
+ */
 class Repeater implements RepeaterInterface
 {
     /**
