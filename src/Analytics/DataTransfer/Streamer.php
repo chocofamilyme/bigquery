@@ -7,9 +7,11 @@
 namespace Chocofamily\Analytics\DataTransfer;
 
 use Chocofamily\Analytics\Repeater;
+use Chocofamily\Analytics\UndeliveredDataStorage;
 use Chocofamily\Analytics\ValidatorInterface;
 
 use Chocofamily\Analytics\Providers\BigQuery\Streamer as ProviderStreamer;
+use Phalcon\Config;
 
 /**
  * Class Sender
@@ -46,35 +48,43 @@ class Streamer extends Transfer
         $config                  = $this->getDI()->getShared('config')->analytics;
         $attempt                 = $config->get('repeater')->get('attempt', 5);
         $this->excludeExceptions = $config->get('repeater')->get('exclude', []);
-        $excludeExceptions       = $this->excludeExceptions;
 
         $this->transfer = new ProviderStreamer($config);
 
         $this->repeater = new Repeater(
             self::REPEAT_DELAY,
             $attempt,
-            function ($exception) use ($excludeExceptions) {
-                return in_array(get_class($exception), $excludeExceptions);
+            function ($exception) {
+                return in_array(get_class($exception), $this->excludeExceptions);
             }
         );
     }
 
     /**
+     * @throws \Chocofamily\Analytics\Exceptions\ClassNotFound
+     * @throws \Chocofamily\Analytics\Exceptions\ValidationException
      */
     public function send()
     {
-        $rows = $this->validator->check();
+        /** @var Config $config */
+        $config = $this->getDI()->getShared('config')->analytics;
+        $rows   = $this->validator->check();
 
         $this->dataMap($rows);
         $this->transfer->setRows($this->prepare($rows));
 
         try {
-            $this->repeater->run(function (ProviderStreamer $transfer) {
-                $transfer->execute();
-            }, $this->transfer);
+            $this->repeater->run(function () {
+                $this->transfer->execute();
+            });
         } catch (\Exception $e) {
             if (false == in_array(get_class($e), $this->excludeExceptions)) {
-                //TODO SAVE
+                $undeliveredDataStorage = new UndeliveredDataStorage(
+                    $config->get('undeliveredDataModel'),
+                    $this->transfer->getTableName()
+                );
+
+                $undeliveredDataStorage->insert($rows);
             }
         }
 

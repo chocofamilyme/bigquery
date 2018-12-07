@@ -7,27 +7,14 @@
 namespace Chocofamily\Analytics\Providers\BigQuery;
 
 use Chocofamily\Analytics\Exceptions\ValidationException;
-use Chocofamily\Analytics\Services\UndeliveredData;
 use Google\Cloud\BigQuery\InsertResponse;
-use Phalcon\Config;
 
 class Streamer extends Transfer
 {
-
-    private $undeliveredDataModel;
-
     /**
      * @var array
      */
     private $rows = [];
-
-    public function __construct(Config $config)
-    {
-        parent::__construct($config);
-
-        $this->undeliveredDataModel = $config['undeliveredDataModel'];
-        //$this->exclude              = $config['repeater']->get('exclude')->toArray();
-    }
 
     public function setRows(array $rows)
     {
@@ -54,24 +41,5 @@ class Streamer extends Transfer
         }
 
         return true;
-    }
-
-    /**
-     * @param array $rows
-     *
-     * @throws ValidationException
-     * @throws \Chocofamily\Analytics\Exceptions\ClassNotFound
-     */
-    private function createUndeliveredData(array $rows)
-    {
-        if ($this->undeliveredDataModel === null) {
-            throw new ValidationException(
-                'Укажите модель для записи недоставленных данных в analytics, по ключу `undeliveredDataModel`'
-            );
-        }
-        $undeliveredService = new UndeliveredData($this->undeliveredDataModel);
-        $tableName          = $this->getTableName();
-        $data               = \json_encode($rows);
-        $undeliveredService->create($tableName, $data);
     }
 }
