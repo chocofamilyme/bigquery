@@ -6,23 +6,33 @@
 
 namespace Chocofamily\Analytics;
 
-use Chocofamily\Analytics\Providers\BigQuery\Streamer;
 use Chocofamily\Analytics\Providers\ProviderInterface;
 
 /**
- * Class DataBuffer
+ * Class DataBuffer накапливает данные таблиц перед отправкой, чтобы отправить пачкой при превышении литима
+ * времени жизни или размера буфера
+ *
+ * С вероятностью установленной в константе FORCE_PERCENT проверяет на литмит буффер всех таблиц
  *
  * @package Chocofamily\Analytics
  */
-class StreamBuffer
+class StreamBuffer implements StreamBufferInterface
 {
 
     /**
      * Сколько данные должны лежать в буфере (секунды)
      */
-    const TIME_LIMIT         = 600;
+    const TIME_LIMIT = 600;
+
+    /**
+     * Размер буффера по умолчанию
+     */
     const SIZE_LIMIT_DEFAULT = 50;
-    const FORCE_PERCENT      = 5;
+
+    /**
+     * Вероятность того что проверить буффе всех таблиц
+     */
+    const FORCE_PERCENT = 5;
 
     /**
      * @var array

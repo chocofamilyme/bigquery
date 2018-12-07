@@ -7,6 +7,7 @@
 namespace Chocofamily\Analytics\DataTransfer;
 
 use Chocofamily\Analytics\StreamBuffer;
+use Chocofamily\Analytics\StreamBufferInterface;
 use Chocofamily\Analytics\UndeliveredDataStorage;
 use Chocofamily\Analytics\ValidatorInterface;
 
@@ -22,6 +23,9 @@ use Chocofamily\Analytics\Providers\BigQuery\Streamer as ProviderStreamer;
 class StreamerWrapper extends Delivery
 {
 
+    /**
+     * @var StreamBufferInterface
+     */
     private $buffer;
 
     /**
@@ -38,6 +42,7 @@ class StreamerWrapper extends Delivery
     }
 
     /**
+     * Отправить данные
      */
     public function send()
     {
