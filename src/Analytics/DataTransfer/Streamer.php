@@ -86,6 +86,7 @@ class Streamer extends Transfer
 
                 $undeliveredDataStorage->insert($rows);
             }
+            throw $e;
         }
 
 

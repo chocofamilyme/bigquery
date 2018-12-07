@@ -6,11 +6,10 @@
 
 namespace Unit;
 
-use Chocofamily\Analytics\DataTransfer\Streamer;
-use Helper\Analytics\ProviderMock;
 use Chocofamily\Analytics\SenderValidator;
+use Helper\Analytics\Models\TransferMock;
 
-class SenderCest
+class TransferCest
 {
     /**
      * @param \UnitTester  $I
@@ -24,15 +23,13 @@ class SenderCest
             [
                 'uuid'       => '1',
                 'created_at' => '2015-08-13 12:00:00',
-                'info'       => 'astana',
+                'info'       => 'test',
             ],
         ];
 
-        $validator        = new SenderValidator($data);
-        $sender           = new Streamer($validator);
-        $sender->transfer = new ProviderMock();
-
-        $result = $helper->invokeMethod($sender, 'prepare', [$data]);
+        $validator = new SenderValidator($data);
+        $streamer  = new TransferMock($validator);
+        $result = $helper->invokeMethod($streamer, 'prepare', [$data]);
 
         $I->assertEquals([
             [
