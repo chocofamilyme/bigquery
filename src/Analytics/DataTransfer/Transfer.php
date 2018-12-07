@@ -9,7 +9,6 @@ namespace Chocofamily\Analytics\DataTransfer;
 use Chocofamily\Analytics\MapperInterface;
 use Chocofamily\Analytics\NullMapper;
 use Chocofamily\Analytics\Providers\ProviderInterface;
-use Chocofamily\Analytics\Repeater;
 use Chocofamily\Analytics\ValidatorInterface;
 use Phalcon\Di\Injectable;
 use Phalcon\Logger\AdapterInterface;
@@ -47,6 +46,11 @@ abstract class Transfer extends Injectable implements TransferInterface
         $this->mapper    = new NullMapper();
     }
 
+    public function setTable(string $tableName): void
+    {
+        $this->transfer->setTable($tableName);
+    }
+
     abstract public function send();
 
     /**
@@ -57,7 +61,7 @@ abstract class Transfer extends Injectable implements TransferInterface
      *
      * @return array
      */
-    public function prepare(array $rows): array
+    protected function prepare(array $rows): array
     {
         return array_map(function ($data) {
             return [
@@ -70,7 +74,7 @@ abstract class Transfer extends Injectable implements TransferInterface
     /**
      * Записать ошибки
      */
-    protected function writeError()
+    protected function writeError(): void
     {
         foreach ($this->transfer->getErrors() as $key => $value) {
             $this->logger->warning($key.': '.$value);
@@ -80,7 +84,7 @@ abstract class Transfer extends Injectable implements TransferInterface
     /**
      * Очищает буффер ошибок
      */
-    public function clearErrors()
+    public function clearErrors(): void
     {
         $this->transfer->clearErrors();
     }
@@ -93,10 +97,15 @@ abstract class Transfer extends Injectable implements TransferInterface
         $this->mapper = $mapper;
     }
 
+    public function setClientData(array $data): void
+    {
+        $this->validator->setClientData($data);
+    }
+
     /**
      * @param array $rows
      */
-    protected function dataMap(array &$rows)
+    protected function dataMap(array &$rows): void
     {
         foreach ($rows as &$row) {
             $this->mapper->process($row);

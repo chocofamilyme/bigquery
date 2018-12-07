@@ -6,12 +6,10 @@
 
 namespace Chocofamily\Analytics\Providers\BigQuery;
 
-use Chocofamily\Analytics\Exceptions\ValidationException;
 use Chocofamily\Analytics\Providers\ProviderInterface;
 use Google\Cloud\BigQuery\Table;
 use Phalcon\Config;
 use Google\Cloud\BigQuery\BigQueryClient;
-use Google\Cloud\Core\ExponentialBackoff;
 
 /**
  * Class BigQuery
@@ -52,11 +50,6 @@ abstract class Transfer implements ProviderInterface
     private $table;
 
     /**
-     * @var int
-     */
-    protected $attempt = 5;
-
-    /**
      * @var string
      */
     private $tableName;
@@ -68,7 +61,6 @@ abstract class Transfer implements ProviderInterface
             'keyFilePath' => $config->get('path'),
         ]);
 
-        $this->attempt = $config['repeater']->get('attempt', 5);
         $this->dataSet = $this->client->dataset($config->get('dataset'));
     }
 

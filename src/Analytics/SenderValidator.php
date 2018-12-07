@@ -66,7 +66,6 @@ class SenderValidator implements ValidatorInterface
                     throw new ValidationException('The uuid is required');
                 }
 
-                //TODO написать логирование ошибок
                 $this->badMessages[$item['uuid']] = $massage;
             }
         }

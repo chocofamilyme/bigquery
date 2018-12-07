@@ -6,6 +6,8 @@
 
 namespace Chocofamily\Analytics\DataTransfer;
 
+use Chocofamily\Analytics\MapperInterface;
+
 /**
  * Interface TransferInterface
  *
@@ -14,4 +16,12 @@ namespace Chocofamily\Analytics\DataTransfer;
 interface TransferInterface
 {
     public function send();
+
+    public function setTable(string $tableName): void;
+
+    public function setMapper(MapperInterface $mapper): void;
+
+    public function setClientData(array $data): void;
+
+    public function clearErrors(): void;
 }

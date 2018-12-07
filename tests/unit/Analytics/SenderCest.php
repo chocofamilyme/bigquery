@@ -12,7 +12,13 @@ use Chocofamily\Analytics\SenderValidator;
 
 class SenderCest
 {
-    public function tryToPrepare(\UnitTester $I)
+    /**
+     * @param \UnitTester  $I
+     * @param \Helper\Unit $helper
+     *
+     * @throws \ReflectionException
+     */
+    public function tryToPrepare(\UnitTester $I, \Helper\Unit $helper)
     {
         $data = [
             [
@@ -24,8 +30,9 @@ class SenderCest
 
         $validator        = new SenderValidator($data);
         $sender           = new Streamer($validator);
-        $sender->provider = new ProviderMock();
-        $result           = $sender->prepare($data);
+        $sender->transfer = new ProviderMock();
+
+        $result = $helper->invokeMethod($sender, 'prepare', [$data]);
 
         $I->assertEquals([
             [
