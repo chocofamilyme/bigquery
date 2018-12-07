@@ -138,6 +138,7 @@ class StreamBuffer
     {
         if (rand(1, 100) < self::FORCE_PERCENT) {
             foreach ($this->buffer as $tableName => $buffer) {
+                $provider->setTable($tableName);
                 $this->run($provider);
             }
         }
