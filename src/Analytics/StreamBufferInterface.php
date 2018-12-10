@@ -11,7 +11,7 @@ use Chocofamily\Analytics\Providers\ProviderInterface;
 interface StreamBufferInterface
 {
 
-    public function addBuffer(string $tableName, array $row, int $sizeLimit): void;
+    public function addBuffer(string $tableName, array $row): void;
 
     public function run(ProviderInterface $provider): bool;
 }

@@ -32,7 +32,7 @@ class Streamer extends Transfer implements StreamerInterface
      * @return bool
      * @throws ValidationException
      */
-    public function execute(): bool
+    public function send(): bool
     {
         if (empty($this->getTable())) {
             throw new ValidationException('Укажите таблицу');

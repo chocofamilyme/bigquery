@@ -32,13 +32,14 @@ class StreamerWrapper extends Delivery
      * Streamer constructor.
      *
      * @param ValidatorInterface $validator
+     * @param int                $bufferSize
      */
-    public function __construct(ValidatorInterface $validator)
+    public function __construct(ValidatorInterface $validator, int $bufferSize)
     {
         parent::__construct($validator);
 
         $this->transfer = new ProviderStreamer($this->config);
-        $this->buffer   = new StreamBuffer($this->getStreamFunction());
+        $this->buffer   = new StreamBuffer($this->getStreamFunction(), $bufferSize);
     }
 
     /**
@@ -64,21 +65,30 @@ class StreamerWrapper extends Delivery
      */
     private function getStreamFunction()
     {
-        return function (ProviderStreamer $transfer, array $rows) {
-            $transfer->setRows($rows);
-            try {
-                return $transfer->execute();
-            } catch (\Exception $e) {
-                if (false == $this->isExclude($e)) {
-                    $undeliveredDataStorage = new UndeliveredDataStorage(
-                        $this->config->get('undeliveredDataModel'),
-                        $this->transfer->getTableName()
-                    );
+        return function (ProviderStreamer $transfer, array $tables) {
+            $exception = null;
+            
+            foreach ($tables as $key => $rows) {
+                try {
+                    $transfer->setTable($key);
+                    $transfer->setRows($rows);
+                    $this->execute();
+                } catch (\Exception $e) {
+                    if (false == $this->isExclude($e)) {
+                        $undeliveredDataStorage = new UndeliveredDataStorage(
+                            $this->config->get('undeliveredDataModel'),
+                            $this->transfer->getTableName()
+                        );
 
-                    $undeliveredDataStorage->insert($rows);
+                        $undeliveredDataStorage->insert($rows);
+                    }
+
+                    $exception = $e;
                 }
+            }
 
-                throw $e;
+            if ($exception) {
+                throw $exception;
             }
         };
     }

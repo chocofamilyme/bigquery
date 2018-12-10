@@ -25,7 +25,7 @@ class Query extends Transfer implements QueryInterface
      * @return bool
      * @throws \Google\Cloud\Core\Exception\GoogleException
      */
-    public function execute(): bool
+    public function send(): bool
     {
         $jobConfig   = $this->client->query($this->sql);
         $queryResult = $this->client->runQuery($jobConfig);

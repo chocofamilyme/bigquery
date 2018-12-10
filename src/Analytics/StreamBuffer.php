@@ -25,19 +25,14 @@ class StreamBuffer implements StreamBufferInterface
     const TIME_LIMIT = 600;
 
     /**
-     * Размер буффера по умолчанию
-     */
-    const SIZE_LIMIT_DEFAULT = 50;
-
-    /**
      * Вероятность того что проверить буффе всех таблиц
      */
     const FORCE_PERCENT = 5;
 
     /**
-     * @var array
+     * @var BufferStructure
      */
-    private $buffer = [];
+    private $buffer;
 
     /**
      * @var null
@@ -48,63 +43,55 @@ class StreamBuffer implements StreamBufferInterface
      * DataBuffer constructor.
      *
      * @param callable $callback
+     * @param int      $bufferSize
      */
-    public function __construct(callable $callback)
+    public function __construct(callable $callback, int $bufferSize)
     {
         $this->callback = $callback;
+        $this->buffer   = new BufferStructure($bufferSize);
     }
 
     /**
-     * @param string $tableName
-     *
      * @return array
      */
-    private function getBufferData(string $tableName): array
+    private function getBufferData(): array
     {
-        if (false == isset($this->buffer[$tableName])) {
-            return [];
-        }
-
-        return $this->buffer[$tableName]['data'];
+        return $this->buffer->tables;
     }
 
     /**
      * @param string $tableName
-     * @param int    $sizeLimit
      * @param array  $row
      */
-    public function addBuffer(string $tableName, array $row, int $sizeLimit = self::SIZE_LIMIT_DEFAULT): void
+    public function addBuffer(string $tableName, array $row): void
     {
-        if (false == isset($this->buffer[$tableName])) {
-            $this->buffer[$tableName]['timestamp'] = time();
-            $this->buffer[$tableName]['sizeLimit'] = $sizeLimit;
+        if (false == isset($this->buffer->tables[$tableName])) {
+            $this->buffer->tables[$tableName] = [];
         }
 
-        $this->buffer[$tableName]['data'] = array_merge($this->buffer[$tableName]['data'], $row);
+        $this->buffer->tables[$tableName] = array_merge($this->buffer->tables[$tableName], $row);
     }
 
     /**
-     * @param string $tableName
-     *
      * @return int
      */
-    private function size(string $tableName): int
+    private function size(): int
     {
-        if (false == isset($this->buffer[$tableName])) {
-            return 0;
+        $size = 0;
+
+        foreach ($this->buffer->tables as $table) {
+            $size += count($table);
         }
 
-        return count($this->buffer[$tableName]['data']);
+        return $size;
     }
 
     /**
-     * @param string $tableName
      */
-    private function flush(string $tableName): void
+    private function flush(): void
     {
-        if (isset($this->buffer[$tableName])) {
-            unset($this->buffer[$tableName]);
-        }
+        $this->buffer->tables    = [];
+        $this->buffer->timestamp = time();
     }
 
     /**
@@ -114,15 +101,13 @@ class StreamBuffer implements StreamBufferInterface
      */
     public function run(ProviderInterface $provider): bool
     {
-        $tableName = $provider->getTableName();
-        if ($this->isOverLimit($tableName)) {
+        if ($this->isOverLimit()) {
             $result = call_user_func_array($this->callback, [
                 $provider,
-                $this->getBufferData($tableName),
+                $this->getBufferData(),
             ]);
 
-            $this->flush($tableName);
-            $this->force($provider);
+            $this->flush();
 
             return $result;
         }
@@ -131,30 +116,11 @@ class StreamBuffer implements StreamBufferInterface
     }
 
     /**
-     * @param string $tableName
      *
      * @return bool
      */
-    private function isOverLimit(string $tableName): bool
+    private function isOverLimit(): bool
     {
-        if (false == isset($this->buffer[$tableName])) {
-            return false;
-        }
-
-        return $this->size($tableName) >= $this->buffer[$tableName]['sizeLimit'] or
-            time() - self::TIME_LIMIT > $this->buffer[$tableName]['timestamp'];
-    }
-
-    /**
-     * @param ProviderInterface $provider
-     */
-    private function force(ProviderInterface $provider)
-    {
-        if (rand(1, 100) < self::FORCE_PERCENT) {
-            foreach ($this->buffer as $tableName => $buffer) {
-                $provider->setTable($tableName);
-                $this->run($provider);
-            }
-        }
+        return $this->size() >= $this->buffer->maxSize or time() - self::TIME_LIMIT > $this->buffer->timestamp;
     }
 }

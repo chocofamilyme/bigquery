@@ -26,7 +26,7 @@ class BigQueryCest
         $I->expectException(
             new ValidationException('Укажите таблицу'),
             function () use ($providerWrapper) {
-                $providerWrapper->execute();
+                $providerWrapper->send();
             }
         );
     }

@@ -16,7 +16,7 @@ class StreamerMock implements \Chocofamily\Analytics\Providers\ProviderInterface
      */
     public $thrownException = null;
 
-    public function execute(): bool
+    public function send(): bool
     {
         if (isset($this->thrownException)) {
             throw $this->thrownException;

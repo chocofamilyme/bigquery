@@ -57,7 +57,7 @@ class RunnerWrapper extends Delivery
 
         try {
             $this->transfer->setFile($this->getFilePath());
-            $this->transfer->execute();
+            $this->transfer->send();
         } catch (\Exception $e) {
             throw $e;
         } finally {

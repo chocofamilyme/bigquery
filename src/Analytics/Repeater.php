@@ -42,6 +42,13 @@ class Repeater implements RepeaterInterface
         $this->excludeFunction = $excludeFunction;
     }
 
+    /**
+     * @param callable $clientFunction
+     * @param mixed    ...$arguments
+     *
+     * @return mixed
+     * @throws \Exception
+     */
     public function run(callable $clientFunction, ...$arguments)
     {
         $retryAttempt = 0;
@@ -68,7 +75,10 @@ class Repeater implements RepeaterInterface
         throw $exception;
     }
 
-    public function calculateDelay(int $retryAttempt)
+    /**
+     * @param int $retryAttempt
+     */
+    public function calculateDelay(int $retryAttempt): void
     {
         usleep($this->delay * $retryAttempt);
     }

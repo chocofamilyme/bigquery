@@ -32,7 +32,7 @@ class Job extends Transfer implements JobInterface
      * @return bool
      * @throws ValidationException
      */
-    public function execute(): bool
+    public function send(): bool
     {
         if (empty($this->getTable())) {
             throw new ValidationException('Укажите таблицу');

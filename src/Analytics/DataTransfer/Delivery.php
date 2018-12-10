@@ -91,7 +91,7 @@ abstract class Delivery extends Injectable implements DeliveryInterface
     protected function execute()
     {
         $this->repeater->run(function () {
-            $this->transfer->execute();
+            $this->transfer->send();
         });
     }
 
