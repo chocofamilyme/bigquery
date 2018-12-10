@@ -49,7 +49,7 @@ class DataValidator implements ValidatorInterface
     /**
      * @throws ValidationException
      */
-    private function validation()
+    private function validation(): void
     {
         $validation = new Validation();
         $validation->add([
@@ -88,7 +88,7 @@ class DataValidator implements ValidatorInterface
     /**
      * @param $data
      */
-    public function setClientData(array $data)
+    public function setClientData(array $data): void
     {
         $this->clientData = $data;
     }

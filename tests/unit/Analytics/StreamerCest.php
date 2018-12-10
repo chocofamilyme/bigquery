@@ -19,7 +19,7 @@ class StreamerCest
      */
     private $streamer;
 
-    public function setUp()
+    public function _before()
     {
         $data        = [
             [

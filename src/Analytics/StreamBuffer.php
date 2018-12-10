@@ -61,15 +61,15 @@ class StreamBuffer implements StreamBufferInterface
 
     /**
      * @param string $tableName
-     * @param array  $row
+     * @param array  $rows
      */
-    public function addBuffer(string $tableName, array $row): void
+    public function addBuffer(string $tableName, array $rows): void
     {
         if (false == isset($this->buffer->tables[$tableName])) {
             $this->buffer->tables[$tableName] = [];
         }
 
-        $this->buffer->tables[$tableName] = array_merge($this->buffer->tables[$tableName], $row);
+        $this->buffer->tables[$tableName] = array_merge($this->buffer->tables[$tableName], $rows);
     }
 
     /**

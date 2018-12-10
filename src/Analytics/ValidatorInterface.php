@@ -10,5 +10,5 @@ interface ValidatorInterface
 {
     public function check(): array;
 
-    public function setClientData(array $data);
+    public function setClientData(array $data): void;
 }

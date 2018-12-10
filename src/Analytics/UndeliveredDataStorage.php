@@ -23,7 +23,7 @@ class UndeliveredDataStorage
     public function __construct($undeliveredDataModel, $tableName)
     {
         $this->undeliveredDataModel = $undeliveredDataModel;
-        $this->tableName = $tableName;
+        $this->tableName            = $tableName;
     }
 
     /**
@@ -32,7 +32,7 @@ class UndeliveredDataStorage
      * @throws ValidationException
      * @throws \Chocofamily\Analytics\Exceptions\ClassNotFound
      */
-    public function insert(array $rows)
+    public function insert(array $rows): void
     {
         if ($this->undeliveredDataModel === null) {
             throw new ValidationException(
