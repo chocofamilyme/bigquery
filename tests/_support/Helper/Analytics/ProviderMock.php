@@ -5,10 +5,8 @@
  */
 namespace Helper\Analytics;
 
-class StreamerMock implements \Chocofamily\Analytics\Providers\ProviderInterface
+class ProviderMock implements \Chocofamily\Analytics\Providers\ProviderInterface
 {
-    private $rows;
-
     private $tableName;
 
     /**
@@ -18,9 +16,6 @@ class StreamerMock implements \Chocofamily\Analytics\Providers\ProviderInterface
 
     public function send(): bool
     {
-        if (isset($this->thrownException)) {
-            throw $this->thrownException;
-        }
         return true;
     }
 
@@ -62,15 +57,5 @@ class StreamerMock implements \Chocofamily\Analytics\Providers\ProviderInterface
     public function getTableName()
     {
         return $this->tableName;
-    }
-
-    public function setRows($rows)
-    {
-        $this->rows = $rows;
-    }
-
-    public function throwException($exception)
-    {
-        $this->thrownException = $exception;
     }
 }

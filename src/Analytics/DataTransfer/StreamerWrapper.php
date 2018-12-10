@@ -6,6 +6,7 @@
 
 namespace Chocofamily\Analytics\DataTransfer;
 
+use Chocofamily\Analytics\Exceptions\ValidationException;
 use Chocofamily\Analytics\StreamBuffer;
 use Chocofamily\Analytics\StreamBufferInterface;
 use Chocofamily\Analytics\UndeliveredDataStorage;
@@ -44,9 +45,15 @@ class StreamerWrapper extends Delivery
 
     /**
      * Отправить данные
+     *
+     * @throws ValidationException
      */
     public function send()
     {
+        if(empty($this->transfer->getTableName())) {
+            throw new ValidationException('Укажите таблицу');
+        }
+
         $rows = $this->validator->check();
 
         $this->dataMap($rows);
@@ -67,7 +74,7 @@ class StreamerWrapper extends Delivery
     {
         return function (ProviderStreamer $transfer, array $tables) {
             $exception = null;
-            
+
             foreach ($tables as $key => $rows) {
                 try {
                     $transfer->setTable($key);

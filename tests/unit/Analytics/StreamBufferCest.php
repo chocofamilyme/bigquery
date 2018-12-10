@@ -8,7 +8,7 @@ namespace Unit;
 
 use Chocofamily\Analytics\BufferStructure;
 use Chocofamily\Analytics\StreamBuffer;
-use Helper\Analytics\StreamerMock;
+use Helper\Analytics\ProviderMock;
 
 class StreamBufferCest
 {
@@ -175,7 +175,7 @@ class StreamBufferCest
 
         $helper->invokeProperty($this->streamBuffer, 'buffer', $buffer);
 
-        $provider = new StreamerMock();
+        $provider = new ProviderMock();
         $actual   = $this->streamBuffer->run($provider);
 
         $I->assertTrue($actual);

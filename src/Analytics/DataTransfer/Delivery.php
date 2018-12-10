@@ -49,7 +49,7 @@ abstract class Delivery extends Injectable implements DeliveryInterface
     /**
      * @var array
      */
-    private $excludeExceptions = [];
+    protected $excludeExceptions = [];
 
 
     /**
