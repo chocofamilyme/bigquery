@@ -6,7 +6,7 @@
 
 namespace Chocofamily\Analytics\Providers;
 
-interface StreamerInterface
+interface StreamerInterface extends ProviderInterface
 {
     public function setRows(array $rows): void;
 }

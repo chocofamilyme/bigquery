@@ -9,11 +9,6 @@ class ProviderMock implements \Chocofamily\Analytics\Providers\ProviderInterface
 {
     private $tableName;
 
-    /**
-     * @var \Exception
-     */
-    public $thrownException = null;
-
     public function send(): bool
     {
         return true;

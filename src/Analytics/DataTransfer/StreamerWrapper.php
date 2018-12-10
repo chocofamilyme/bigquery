@@ -7,6 +7,7 @@
 namespace Chocofamily\Analytics\DataTransfer;
 
 use Chocofamily\Analytics\Exceptions\ValidationException;
+use Chocofamily\Analytics\Providers\StreamerInterface;
 use Chocofamily\Analytics\StreamBuffer;
 use Chocofamily\Analytics\StreamBufferInterface;
 use Chocofamily\Analytics\UndeliveredDataStorage;
@@ -50,7 +51,7 @@ class StreamerWrapper extends Delivery
      */
     public function send()
     {
-        if(empty($this->transfer->getTableName())) {
+        if (empty($this->transfer->getTableName())) {
             throw new ValidationException('Укажите таблицу');
         }
 
@@ -72,7 +73,7 @@ class StreamerWrapper extends Delivery
      */
     private function getStreamFunction()
     {
-        return function (ProviderStreamer $transfer, array $tables) {
+        return function (StreamerInterface $transfer, array $tables): bool {
             $exception = null;
 
             foreach ($tables as $key => $rows) {
@@ -97,6 +98,8 @@ class StreamerWrapper extends Delivery
             if ($exception) {
                 throw $exception;
             }
+
+            return true;
         };
     }
 }

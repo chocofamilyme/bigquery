@@ -9,9 +9,8 @@ namespace Unit;
 use Chocofamily\Analytics\DataTransfer\StreamerWrapper;
 use Chocofamily\Analytics\Exceptions\ValidationException;
 use Chocofamily\Analytics\DataValidator;
-use Chocofamily\Analytics\StreamBuffer;
 use Helper\Analytics\Models\UndeliveredDataMock;
-use Helper\Analytics\ProviderMock;
+use Helper\Analytics\StreamerProviderMock;
 
 class StreamerWrapperCest
 {
@@ -32,9 +31,9 @@ class StreamerWrapperCest
         $mapperClass = \Phalcon\Di::getDefault()->getShared('config')->analytics->mappers->tableName;
 
         $validator      = new DataValidator($data);
-        $this->streamer = new StreamerWrapper($validator, 50);
+        $this->streamer = new StreamerWrapper($validator, 1);
 
-        $this->streamer->transfer = new ProviderMock();
+        $this->streamer->transfer = new StreamerProviderMock();
 
         $this->streamer->setMapper(new $mapperClass);
         $this->streamer->validator->setClientData($data);
