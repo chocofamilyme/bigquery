@@ -26,7 +26,6 @@ $di->set(
                 'path'          => __DIR__.'/_data/keys/key.json',
                 'queueName'     => 'analytics',
                 'exchangeType'  => 'direct',
-                'prefetchCount' => 10,
 
                 'undeliveredDataModel' => \Helper\Analytics\Models\UndeliveredDataMock::class,
 

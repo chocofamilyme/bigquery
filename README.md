@@ -22,7 +22,6 @@ analytics со следующими полями
     'path'          => STORAGE_PATH.'keys/'.env('ANALYTICS_KEYS'),
     'queueName'     => 'analytics',
     'exchangeType'  => 'direct',
-    'prefetchCount' => 10,
 
     'undeliveredDataModel' => <Полное название класса для записи неотправленных данных>,
 
@@ -57,8 +56,9 @@ $table->addTimestamps()->create();
 
 ### Пример потоковой вставки данных в BigQuery
 ```php
+$bufferSize = 50;
 $validator = new SenderValidator();
-$streamer    = new Streamer($validator)
+$streamer    = new StreamerWrapper($validator, $bufferSize)
 
 $mapperClass = $this->config['mappers']->get($body['table_name'], NullMapper::class);
 $mapper = new $mapperClass;
@@ -72,7 +72,7 @@ $streamer->send();
 Используется для загрузки большого объма данных, например отчетов.
 ```php
 $validator = new SenderValidator();
-$runner    = new Runner($validator)
+$runner    = new RunnerWrapper($validator)
 
 $mapperClass = $this->config['mappers']->get($body['table_name'], NullMapper::class);
 $mapper = new $mapperClass;
