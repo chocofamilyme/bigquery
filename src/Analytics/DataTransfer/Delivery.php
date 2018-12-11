@@ -88,7 +88,7 @@ abstract class Delivery extends Injectable implements DeliveryInterface
     /**
      * @throws \Exception
      */
-    protected function execute()
+    protected function execute(): bool
     {
         return $this->repeater->run(function () {
             return $this->transfer->send();

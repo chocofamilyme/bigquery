@@ -26,9 +26,6 @@ abstract class Transfer implements ProviderInterface
         'ignoreUnknownValues' => true,
     ];
 
-    const LIMIT_NUMBER = 100;
-    const LIMIT_STRING = ' LIMIT ';
-
     private $config;
 
     /**

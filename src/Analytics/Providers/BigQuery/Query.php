@@ -16,6 +16,10 @@ use Chocofamily\Analytics\Providers\QueryInterface;
  */
 class Query extends Transfer implements QueryInterface
 {
+
+    const LIMIT_NUMBER = 100;
+    const LIMIT_STRING = ' LIMIT ';
+
     /**
      * @var string
      */
