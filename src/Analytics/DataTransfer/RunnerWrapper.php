@@ -71,7 +71,7 @@ class RunnerWrapper extends Delivery
      * @return string
      * @throws NotFoundFileException
      */
-    private function getFilePath(): string
+    public function getFilePath(): string
     {
         if ($this->tempFile) {
             return $this->tempFile;

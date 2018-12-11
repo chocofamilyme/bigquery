@@ -41,7 +41,7 @@ $di->set(
                         \Google\Cloud\Core\Exception\NotFoundException::class,
                     ],
                 ],
-                'pathStorage' => __DIR__,
+                'pathStorage' => __DIR__.'/storage',
             ],
         ]);
     }
