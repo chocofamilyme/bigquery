@@ -45,7 +45,7 @@ class Job extends Transfer implements JobInterface
 
         $job = $this->getTable()->runJob($loadJobConfig);
 
-        $backoff = new ExponentialBackoff($this->attempt);
+        $backoff = new ExponentialBackoff(3);
 
         $backoff->execute(function () use ($job) {
             $job->reload();
