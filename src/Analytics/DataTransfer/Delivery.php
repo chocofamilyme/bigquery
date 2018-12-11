@@ -66,7 +66,7 @@ abstract class Delivery extends Injectable implements DeliveryInterface
         $this->mapper    = new NullMapper();
 
         $attempt                 = $this->config->get('repeater')->get('attempt', 5);
-        $this->excludeExceptions = $this->config->get('repeater')->get('exclude', []);
+        $this->excludeExceptions = $this->config->get('repeater')->get('exclude')->toArray();
 
         $this->repeater = new Repeater(
             self::REPEAT_DELAY,
