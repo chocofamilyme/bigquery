@@ -9,6 +9,11 @@ namespace Chocofamily\Analytics\Services;
 use Chocofamily\Analytics\Exceptions\ClassNotFound;
 use Phalcon\Mvc\Model;
 
+/**
+ * Class UndeliveredData обрабатывает не отправленные данные
+ *
+ * @package Chocofamily\Analytics\Services
+ */
 class UndeliveredData
 {
     const STATUS_FAILED     = 0;

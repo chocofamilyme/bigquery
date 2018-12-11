@@ -5,17 +5,22 @@
  */
 namespace Helper\Analytics;
 
-class ProviderMock implements \Chocofamily\Analytics\ProviderInterface
+class ProviderMock implements \Chocofamily\Analytics\Providers\ProviderInterface
 {
+    private $tableName;
 
-    public function insert(array $rows)
-    {
-        // TODO: Implement insert() method.
-    }
+    /**
+     * @var \Exception
+     */
+    public $thrownException = null;
 
-    public function load(string $file): bool
+    public function send(): bool
     {
-        // TODO: Implement load() method.
+        if (isset($this->thrownException)) {
+            throw $this->thrownException;
+        }
+
+        return true;
     }
 
     public function exists(): bool
@@ -30,7 +35,12 @@ class ProviderMock implements \Chocofamily\Analytics\ProviderInterface
 
     public function getErrors(): array
     {
-        // TODO: Implement getErrors() method.
+        return [];
+    }
+
+    public function addErrors(string $id, string $message)
+    {
+        // TODO: Implement addErrors() method.
     }
 
     public function clearErrors()
@@ -40,6 +50,16 @@ class ProviderMock implements \Chocofamily\Analytics\ProviderInterface
 
     public function setTable(string $table)
     {
-        // TODO: Implement setTable() method.
+        $this->tableName = $table;
+    }
+
+    public function getTable()
+    {
+        // TODO: Implement getTable() method.
+    }
+
+    public function getTableName()
+    {
+        return $this->tableName;
     }
 }

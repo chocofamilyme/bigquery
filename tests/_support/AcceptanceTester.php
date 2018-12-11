@@ -5,7 +5,7 @@
  * Inherited Methods
  * @method void wantToTest($text)
  * @method void wantTo($text)
- * @method void execute($callable)
+ * @method void send($callable)
  * @method void expectTo($prediction)
  * @method void expect($prediction)
  * @method void amGoingTo($argumentation)

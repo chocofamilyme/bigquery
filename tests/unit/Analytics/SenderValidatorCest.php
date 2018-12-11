@@ -7,7 +7,7 @@
 namespace Unit;
 
 use Chocofamily\Analytics\Exceptions\ValidationException;
-use Chocofamily\Analytics\SenderValidator;
+use Chocofamily\Analytics\DataValidator;
 
 class SenderValidatorCest
 {
@@ -20,7 +20,7 @@ class SenderValidatorCest
             ]
         ];
 
-        $senderValidator = new SenderValidator($data);
+        $senderValidator = new DataValidator($data);
         $validation = new ValidationException('The uuid is required');
 
         $I->expectException($validation, function () use ($helper, $senderValidator) {
@@ -45,7 +45,7 @@ class SenderValidatorCest
             '2' => 'created_at is required'
         ];
 
-        $senderValidator = new SenderValidator($data);
+        $senderValidator = new DataValidator($data);
 
         $helper->invokeProperty($senderValidator, 'badMessages', $badMessages);
         $result = $helper->invokeMethod($senderValidator, 'filter');

@@ -17,7 +17,7 @@ use Phalcon\Validation\Validator\PresenceOf;
  *
  * @package Chocofamily\Analytics
  */
-class SenderValidator implements ValidatorInterface
+class DataValidator implements ValidatorInterface
 {
 
     private $clientData;
@@ -49,7 +49,7 @@ class SenderValidator implements ValidatorInterface
     /**
      * @throws ValidationException
      */
-    private function validation()
+    private function validation(): void
     {
         $validation = new Validation();
         $validation->add([
@@ -66,7 +66,6 @@ class SenderValidator implements ValidatorInterface
                     throw new ValidationException('The uuid is required');
                 }
 
-                //TODO написать логирование ошибок
                 $this->badMessages[$item['uuid']] = $massage;
             }
         }
@@ -89,7 +88,7 @@ class SenderValidator implements ValidatorInterface
     /**
      * @param $data
      */
-    public function setClientData(array $data)
+    public function setClientData(array $data): void
     {
         $this->clientData = $data;
     }

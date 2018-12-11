@@ -6,13 +6,14 @@
 
 namespace Chocofamily\Analytics\DataTransfer;
 
-use Chocofamily\Analytics\Exceptions\ValidationException;
+use Chocofamily\Analytics\Exceptions\NotFoundFileException;
+use Chocofamily\Analytics\Providers\BigQuery\Job;
 use Chocofamily\Analytics\ValidatorInterface;
 
 /**
- * Для запуска задач
+ * Для запуска задач через выбранного провайдера
  */
-class Runner extends Streamer implements TransferInterface
+class RunnerWrapper extends Delivery
 {
 
     const FOLDER        = 'analytics';
@@ -37,11 +38,15 @@ class Runner extends Streamer implements TransferInterface
     {
         parent::__construct($validator);
 
+        $this->transfer = new Job($this->getDI()->getShared('config')->analytics);
+
         $this->pathStorage = $this->getDI()->getShared('config')->analytics->get('pathStorage');
     }
 
+
     /**
-     * @throws ValidationException
+     * @throws NotFoundFileException
+     * @throws \Exception
      */
     public function send()
     {
@@ -51,7 +56,8 @@ class Runner extends Streamer implements TransferInterface
         $this->writeTempFile($rows);
 
         try {
-            $this->provider->load($this->getFilePath());
+            $this->transfer->setFile($this->getFilePath());
+            $this->transfer->send();
         } catch (\Exception $e) {
             throw $e;
         } finally {
@@ -63,9 +69,9 @@ class Runner extends Streamer implements TransferInterface
 
     /**
      * @return string
-     * @throws ValidationException
+     * @throws NotFoundFileException
      */
-    private function getFilePath(): string
+    public function getFilePath(): string
     {
         if ($this->tempFile) {
             return $this->tempFile;
@@ -77,12 +83,12 @@ class Runner extends Streamer implements TransferInterface
     }
 
     /**
-     * @throws ValidationException
+     * @throws NotFoundFileException
      */
     private function createTempFile()
     {
         if (empty($this->pathStorage) and false == is_dir($this->pathStorage)) {
-            throw new ValidationException(
+            throw new NotFoundFileException(
                 sprintf('Папка для хранения временных файлов не существует, проверти настройки параметра pathStorage: %s',
                     $this->pathStorage));
         }
@@ -102,7 +108,7 @@ class Runner extends Streamer implements TransferInterface
      *
      * @param array $rows
      *
-     * @throws ValidationException
+     * @throws NotFoundFileException
      */
     private function writeTempFile(array $rows)
     {
@@ -115,7 +121,7 @@ class Runner extends Streamer implements TransferInterface
     }
 
     /**
-     * @throws ValidationException
+     * @throws NotFoundFileException
      */
     private function deleteTempFile()
     {

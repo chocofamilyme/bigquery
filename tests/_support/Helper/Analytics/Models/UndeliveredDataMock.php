@@ -89,7 +89,9 @@ class UndeliveredDataMock extends \Phalcon\Mvc\Model
 
     public function save($data = null, $whiteList = null)
     {
-        self::$saved = true;
+        if ($this->table_name !== null) {
+            self::$saved = true;
+        }
     }
 
     public function update($data = null, $whiteList = null)

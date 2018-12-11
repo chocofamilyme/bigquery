@@ -34,15 +34,15 @@ $di->set(
                     'tableName' => \Chocofamily\Analytics\NullMapper::class,
                 ],
 
-                'repeater' => [
+                'repeater'    => [
                     'attempt' => 5,
                     'exclude' => [
                         \InvalidArgumentException::class,
                         \Google\Cloud\Core\Exception\NotFoundException::class,
                     ],
                 ],
-                'pathStorage' => __DIR__,
-            ]
+                'pathStorage' => __DIR__.'/storage',
+            ],
         ]);
     }
 );
