@@ -9,7 +9,7 @@ namespace Chocofamily\Analytics\Providers;
 interface ProviderInterface
 {
 
-    public function send(): bool;
+    public function send();
 
     public function exists(): bool;
 

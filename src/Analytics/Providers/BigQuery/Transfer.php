@@ -61,7 +61,7 @@ abstract class Transfer implements ProviderInterface
         $this->dataSet = $this->client->dataset($config->get('dataset'));
     }
 
-    abstract public function send(): bool;
+    abstract public function send();
 
     public function exists(): bool
     {
