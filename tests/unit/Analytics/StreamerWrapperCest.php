@@ -84,7 +84,7 @@ class StreamerWrapperCest
             'excludeExceptions',
             []
         );
-
+        $this->streamer->transfer->thrownException = $exception;
 
         $this->streamer->transfer->setTable('test_table');
 

@@ -9,8 +9,17 @@ class ProviderMock implements \Chocofamily\Analytics\Providers\ProviderInterface
 {
     private $tableName;
 
+    /**
+     * @var \Exception
+     */
+    public $thrownException = null;
+
     public function send(): bool
     {
+        if (isset($this->thrownException)) {
+            throw $this->thrownException;
+        }
+
         return true;
     }
 
