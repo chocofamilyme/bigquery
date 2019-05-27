@@ -26,12 +26,22 @@ class Query extends Transfer implements QueryInterface
     private $sql = '';
 
     /**
+     * @var array
+     */
+    private $params = [];
+
+    /**
      * @return array
      * @throws \Google\Cloud\Core\Exception\GoogleException
      */
     public function send(): array
     {
-        $jobConfig   = $this->client->query($this->sql);
+        if (!empty($this->params)) {
+            $jobConfig = $this->client->query($this->sql)->parameters($this->params);
+        } else {
+            $jobConfig = $this->client->query($this->sql);
+        }
+
         $queryResult = $this->client->runQuery($jobConfig);
 
         return iterator_to_array($queryResult->rows());
@@ -46,6 +56,11 @@ class Query extends Transfer implements QueryInterface
             $sql .= self::LIMIT_STRING.self::LIMIT_NUMBER;
         }
         $this->sql = $sql;
+    }
+
+    public function setParams(array $params): void
+    {
+        $this->params = $params;
     }
 
     /**

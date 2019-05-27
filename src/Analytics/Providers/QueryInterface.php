@@ -9,4 +9,5 @@ namespace Chocofamily\Analytics\Providers;
 interface QueryInterface
 {
     public function setSql(string $sql): void;
+    public function setParams(array $params): void;
 }
