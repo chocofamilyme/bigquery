@@ -87,7 +87,7 @@ $runner->send();
 ```php
 $limit = 100;
 
-$analytics = $this->getDI()->getShared('config')->analytics;
+$analytics = $this->getDI()->getShared('config')->analytics->toArray();
 $provider  = new BigQuery($analytics);
 
 do {
@@ -108,6 +108,6 @@ do {
 Если в запросе не указать LIMIT, по умолчанию подставится LIMIT 100
 ```php
 $query = "SELECT * FROM holding.chocolife_test WHERE created_at = \"2018-11-20\" LIMIT 100"
-$provider = new BigQuery($this->getDI()->getShared('config')->analytics);
+$provider = new BigQuery($this->getDI()->getShared('config')->analytics->toArray());
 $result = $provider->runQuery($query);
 ```
