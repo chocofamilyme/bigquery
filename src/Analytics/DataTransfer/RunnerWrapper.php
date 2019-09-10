@@ -38,7 +38,7 @@ class RunnerWrapper extends Delivery
     {
         parent::__construct($validator);
 
-        $this->transfer = new Job($this->getDI()->getShared('config')->analytics);
+        $this->transfer = new Job($this->getDI()->getShared('config')->analytics->toArray());
 
         $this->pathStorage = $this->getDI()->getShared('config')->analytics->get('pathStorage');
     }

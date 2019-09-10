@@ -54,9 +54,9 @@ abstract class Transfer implements ProviderInterface
     public function __construct(array $config)
     {
         $this->config = $config;
-        $this->client = new BigQueryClient($config);
+        $this->client = new BigQueryClient($this->config['connection']);
 
-        $this->dataSet = $this->client->dataset($config->get('dataset'));
+        $this->dataSet = $this->client->dataset($this->config['dataset']);
     }
 
     abstract public function send();

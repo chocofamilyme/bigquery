@@ -17,29 +17,32 @@ analytics со следующими полями
 #### analytics.php
 ```php
 ...
-[
-    'dataset'       => 'holding',
-    'path'          => STORAGE_PATH.'keys/'.env('ANALYTICS_KEYS'),
-    'queueName'     => 'analytics',
-    'exchangeType'  => 'direct',
+return new \Phalcon\Config([
+    'analytics' => [
+        'dataset'       => 'holding',
+        'queueName'     => 'analytics',
+        'exchangeType'  => 'direct',
 
-    'undeliveredDataModel' => <Полное название класса для записи неотправленных данных>,
-
-    'mappers' => [
-        'table_name' => <Полное название класса для маппинга>,
-    ],
-
-    'repeater' => [
-        'attempt' => env('ATTEMPT', 5),
-        'exclude' => [
-            \InvalidArgumentException::class,
-            \Google\Cloud\Core\Exception\NotFoundException::class,
-            ...
+        'undeliveredDataModel' => \Helper\Analytics\Models\UndeliveredDataMock::class,
+        'connection' => [
+            'keyFilePath' => __DIR__.'/_data/keys/key.json',
+            //'keyFile'     => {},
         ],
+        'mappers' => [
+            'tableName' => \Chocofamily\Analytics\NullMapper::class,
+        ],
+
+        'repeater'    => [
+            'attempt' => 5,
+            'exclude' => [
+                \InvalidArgumentException::class,
+                \Google\Cloud\Core\Exception\NotFoundException::class,
+            ],
+        ],
+
+        'pathStorage' => __DIR__.'/storage',
     ],
-    
-    'pathStorage' => STORAGE_PATH,
-]
+]);
 ...
 ```
 

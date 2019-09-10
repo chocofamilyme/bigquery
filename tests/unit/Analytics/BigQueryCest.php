@@ -18,9 +18,9 @@ class BigQueryCest
     {
         $I->wantToTest('Правило на отсутсвие названия таблицы');
 
-        $analytics      = \Phalcon\Di::getDefault()->getShared('config')->analytics;
+        $analytics      = \Phalcon\Di::getDefault()->getShared('config')->get('analytics');
 
-        $providerWrapper = new Streamer($analytics);
+        $providerWrapper = new Streamer($analytics->toArray());
         $providerWrapper->setRows([]);
 
         $I->expectException(

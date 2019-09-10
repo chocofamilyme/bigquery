@@ -23,12 +23,14 @@ $di->set(
         return new \Phalcon\Config([
             'analytics' => [
                 'dataset'       => 'holding',
-                'path'          => __DIR__.'/_data/keys/key.json',
                 'queueName'     => 'analytics',
                 'exchangeType'  => 'direct',
 
                 'undeliveredDataModel' => \Helper\Analytics\Models\UndeliveredDataMock::class,
-
+                'connection' => [
+                    'keyFilePath' => __DIR__.'/_data/keys/key.json',
+                    //'keyFile'     => {},
+                ],
                 'mappers' => [
                     'tableName' => \Chocofamily\Analytics\NullMapper::class,
                 ],
@@ -40,6 +42,7 @@ $di->set(
                         \Google\Cloud\Core\Exception\NotFoundException::class,
                     ],
                 ],
+
                 'pathStorage' => __DIR__.'/storage',
             ],
         ]);

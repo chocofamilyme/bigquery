@@ -40,7 +40,7 @@ class StreamerWrapper extends Delivery
     {
         parent::__construct($validator);
 
-        $this->transfer = new ProviderStreamer($this->config);
+        $this->transfer = new ProviderStreamer($this->config->toArray());
         $this->buffer   = new StreamBuffer($this->getStreamFunction(), $bufferSize);
     }
 
